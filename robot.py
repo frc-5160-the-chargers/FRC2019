@@ -12,6 +12,9 @@ class MyRobot(magicbot.MagicRobot):
     drivetrain : Drivetrain
 
     def createObjects(self):
+        # Launch vision services
+        wpilib.CameraServer.launch('vision.py:main')
+
         '''Create motors and stuff here'''
         self.rfMotor = ctre.WPI_TalonSRX(robotmap.frontRightDrive)
         self.rbMotor = ctre.WPI_TalonSRX(robotmap.backRightDrive)
