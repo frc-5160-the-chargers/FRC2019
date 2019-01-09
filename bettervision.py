@@ -28,10 +28,10 @@ def main():
         time, img = cvSink.grabFrame(img)
         if time == 0:
             # Send the output the error.
-            outputStream.notifyError(cvSink.getError());
+            outputStream.notifyError(cvSink.getError())
             # skip the rest of the current iteration
             continue
-        img2, contours, hierarchy = cv.findContours(img,cv.RETR_TREE,cv.CHAIN_APPROX_SIMPLE)
+        img2, contours, hierarchy = cv.findContours(img, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
         for contour in contours:
             cv.drawContours(img, [contour], 0, (255, 0, 255), 3)
             contourArea = cv.contourArea(contour)
