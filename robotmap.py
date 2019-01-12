@@ -1,8 +1,8 @@
 # drivetrain
-frontLeftDrive = 2
-frontRightDrive = 13
-backLeftDrive = 1
-backRightDrive = 14
+frontLeftDrive = 1
+frontRightDrive = 8
+backLeftDrive = 2
+backRightDrive = 7
 
 # encoders
 leftEncoderChannelA = 0

@@ -3,6 +3,7 @@ import wpilib
 import wpilib.drive
 
 import robotmap
+import OI
 
 import ctre
 
@@ -23,10 +24,11 @@ class MyRobot(magicbot.MagicRobot):
 
         self.leftMotors = wpilib.SpeedControllerGroup(self.lbMotor, self.lfMotor)
         self.rightMotors = wpilib.SpeedControllerGroup(self.rfMotor, self.rbMotor)
-        self.rightMotors.setInverted(True)
+        self.leftMotors.setInverted(True)
         
         self.drive = wpilib.drive.DifferentialDrive(self.leftMotors, self.rightMotors)
 
+        self.oi = OI.OI()
 
     def teleopInit(self):
         '''Called when teleop starts; optional'''
@@ -37,6 +39,10 @@ class MyRobot(magicbot.MagicRobot):
         '''Called on each iteration of the control loop'''
         try:
             self.drivetrain.handleDriving(wpilib.XboxController(0))
+            if wpilib.XboxController(0).getAButtonPressed():
+                self.oi.beastMode = not self.oi.beastMode
+            if wpilib.XboxController(0).getXButtonPressed():
+                self.oi.twoStickMode = not self.oi.twoStickMode
         except:
             self.onException()
 

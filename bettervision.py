@@ -36,7 +36,7 @@ def main():
             cv.drawContours(img, [contour], 0, (255, 0, 255), 3)
             contourArea = cv.contourArea(contour)
             #minArea and maxArea filters for contours
-            if contourArea < minArea or contourArea > maxArea:
+            if contourArea < -1 or contourArea > 99999999999999:
                 continue
 
             #The last test we will cover is solidity. 
