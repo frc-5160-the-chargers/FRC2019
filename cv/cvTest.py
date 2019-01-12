@@ -10,6 +10,10 @@ gripPipeline = grip.GripPipeline()
 
 while True:
     ret, frame = camera.read()
+
+    contours = gripPipeline.process(frame)
+    cv2.drawContours(frame, contours, 0, (0, 255, 0), 3)
+
     cv2.imshow("test", frame)
     if not ret:
         break
@@ -22,7 +26,7 @@ while True:
     elif k%256 == 32:
         # SPACE pressed
         contours = gripPipeline.process(frame)
-        print(contours)
+        print(len(contours))
 
 
 cv2.destroyAllWindows()
