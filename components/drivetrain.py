@@ -2,7 +2,6 @@ import magicbot
 import ctre
 import wpilib
 import wpilib.drive
-import OI
 
 class Drivetrain:
     rfMotor: ctre.WPI_TalonSRX
@@ -17,11 +16,11 @@ class Drivetrain:
 
     oi: OI.OI
 
-    def execute(self):
-        pass
+    def drive(self, left_motor_val=0, right_motor_val=0, square_inputs=False):
+        self.left_motor_speed = left_motor_val
+        self.right_motor_speed = right_motor_val
+        self.square_inputs = False
 
-    def handleDriving(self, joystick : wpilib.XboxController):
-        if self.oi.twoStickMode:
-            self.drive.tankDrive(self.oi.process(joystick.getRawAxis(5 if self.oi.beastMode else 1)), self.oi.process(joystick.getRawAxis(1 if self.oi.beastMode else 5)))
-        else:
-            self.drive.arcadeDrive(self.oi.process(joystick.getRawAxis(1)), -joystick.getRawAxis(4)/2)
+
+    def execute(self):
+        self.drive.tankDrive(self.left_motor_speed, self.right_motor_speed, self.square_inputs)
