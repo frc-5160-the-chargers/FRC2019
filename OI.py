@@ -1,6 +1,8 @@
 import math
 
 class OI:
+    DEADZONE = 0.1
+
     def __init__(self):
         self.beastMode = False
         self.twoStickMode = False
@@ -9,10 +11,9 @@ class OI:
         return math.pow(i, 3)/1.25
 
     def deadzone(self, i):
-        DZ = 0.1
-        if i < -DZ:
+        if i < -OI.DEADZONE:
             return i
-        elif i > DZ:
+        elif i > OI.DEADZONE:
             return i
         else:
             return 0

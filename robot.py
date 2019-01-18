@@ -9,14 +9,17 @@ import ctre
 
 from components.drivetrain import Drivetrain
 
+# flags
+FBXC = True
+
 class MyRobot(magicbot.MagicRobot):
     drivetrain : Drivetrain
 
     def createObjects(self):
+        '''Create motors and stuff here'''
         # Launch vision services
         wpilib.CameraServer.launch('vision.py:main')
 
-        '''Create motors and stuff here'''
         self.rfMotor = ctre.WPI_TalonSRX(robotmap.frontRightDrive)
         self.rbMotor = ctre.WPI_TalonSRX(robotmap.backRightDrive)
         self.lbMotor = ctre.WPI_TalonSRX(robotmap.backLeftDrive)
@@ -24,7 +27,11 @@ class MyRobot(magicbot.MagicRobot):
 
         self.leftMotors = wpilib.SpeedControllerGroup(self.lbMotor, self.lfMotor)
         self.rightMotors = wpilib.SpeedControllerGroup(self.rfMotor, self.rbMotor)
-        self.leftMotors.setInverted(True)
+        
+        if FBXC:
+            self.rightMotors.setInverted(True)
+        else:
+            self.leftMotors.setInverted(True)
         
         self.drive = wpilib.drive.DifferentialDrive(self.leftMotors, self.rightMotors)
 
