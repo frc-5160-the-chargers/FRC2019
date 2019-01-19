@@ -4,6 +4,7 @@ import wpilib.drive
 
 import robotmap
 import OI
+from OI import Side
 
 import ctre
 
@@ -59,9 +60,9 @@ class MyRobot(magicbot.MagicRobot):
         try:
             #this part does the wheels
             if self.oi.twoStickMode:
-                self.drivetrain.driveRobot(self.oi.twoStickMode, self.oi.process(self.joystick.getRawAxis(5 if self.oi.beastMode else 1)), self.oi.process(self.joystick.getRawAxis(1 if self.oi.beastMode else 5)), square_inputs=True)
+                self.drivetrain.driveRobot(self.oi.twoStickMode, self.oi.process_driver_input(Side.LEFT), self.oi.process_driver_input(Side.RIGHT), square_inputs=True)
             else:
-                self.drivetrain.driveRobot(self.oi.twoStickMode, self.oi.process(self.joystick.getRawAxis(1)), -self.joystick.getRawAxis(4)/2, square_inputs=True)
+                self.drivetrain.driveRobot(self.oi.twoStickMode, self.oi.process_driver_input(Side.LEFT), self.oi.process_driver_input(Side.RIGHT), square_inputs=True)
 
             #this part does the mode switching
             if wpilib.XboxController(0).getAButtonPressed():

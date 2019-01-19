@@ -1,5 +1,5 @@
 import math
-import enum
+from enum import Enum, unique, auto
 
 import wpilib
 
@@ -29,14 +29,17 @@ class OI:
         else:
             return 0
 
-    def process(self, joystick: wpilib.XboxController):
+    def __process(self, joystick: wpilib.XboxController):
         return self.deadzone(self.curve(joystick) * (-1 if self.beastMode else 1))
     
-    def process_driver_input(self, robot_side)
-        if robot_side == OI.Side.LEFT:
-
-        
+    def process_driver_input(self, robot_side):
         if self.twoStickMode:
-            pass
+            if robot_side == Side.LEFT:
+                return self.__process(self.driver_joystick.getRawAxis(5 if self.beastMode else 1))
+            elif robot_side == Side.RIGHT:
+                return self.__process(self.driver_joystick.getRawAxis(1 if self.beastMode else 5))
         else:
-            pass
+            if robot_side == Side.LEFT:
+                return self.__process(self.driver_joystick.getRawAxis(1))
+            elif robot_side == Side.RIGHT:
+                return -self.driver_joystick.getRawAxis(4)/2
