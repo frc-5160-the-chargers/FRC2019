@@ -26,6 +26,14 @@ class MyRobot(magicbot.MagicRobot):
         self.lbMotor = ctre.WPI_TalonSRX(robotmap.backLeftDrive)
         self.lfMotor = ctre.WPI_TalonSRX(robotmap.frontLeftDrive)
 
+        #configure motors - current limit, ramp rate, etc.
+
+        self.rfMotor.configOpenLoopRamp(0.5)
+        self.rbMotor.configOpenLoopRamp(0.5)
+        self.lbMotor.configOpenLoopRamp(0.5)
+        self.lfMotor.configOpenLoopRamp(0.5)
+
+        #group motors
         self.leftMotors = wpilib.SpeedControllerGroup(self.lbMotor, self.lfMotor)
         self.rightMotors = wpilib.SpeedControllerGroup(self.rfMotor, self.rbMotor)
         
@@ -39,6 +47,8 @@ class MyRobot(magicbot.MagicRobot):
 
         self.oi = OI.OI()
 
+        
+
     def teleopInit(self):
         '''Called when teleop starts; optional'''
         pass
@@ -49,9 +59,9 @@ class MyRobot(magicbot.MagicRobot):
         try:
             #this part does the wheels
             if self.oi.twoStickMode:
-                self.drivetrain.drive(self.oi.process(joystick.getRawAxis(5 if self.oi.beastMode else 1)), self.oi.process(joystick.getRawAxis(1 if self.oi.beastmode else 5)))
+                self.drivetrain.driveRobot(self.oi.twoStickMode, self.oi.process(self.joystick.getRawAxis(5 if self.oi.beastMode else 1)), self.oi.process(self.joystick.getRawAxis(1 if self.oi.beastMode else 5)), square_inputs=True)
             else:
-                self.drivetrain.drive(self.oi.process(joystick.getRawAxis(1)), -joystick.getRawAxis(4)/2)
+                self.drivetrain.driveRobot(self.oi.twoStickMode, self.oi.process(self.joystick.getRawAxis(1)), -self.joystick.getRawAxis(4)/2, square_inputs=True)
 
             #this part does the mode switching
             if wpilib.XboxController(0).getAButtonPressed():
