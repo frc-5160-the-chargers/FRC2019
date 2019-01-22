@@ -9,6 +9,9 @@ from OI import Side
 import ctre
 
 from components.drivetrain import Drivetrain
+from components.hatch_extend import HatchExtend
+from components.hatch_grab import HatchGrab
+from components.hatch_mechanism import Hatch
 
 # flags
 FBXC = True
@@ -16,35 +19,43 @@ FBXC = True
 class MyRobot(magicbot.MagicRobot):
 
     #High level components - list these first
-
+    hatch : Hatch
     #Low level components
     drivetrain : Drivetrain
+    hatch_grab : HatchGrab
+    hatch_extend : HatchExtend
 
     def createObjects(self):
         '''Create motors and stuff here'''
-        self.rfMotor = ctre.WPI_TalonSRX(robotmap.frontRightDrive)
-        self.rbMotor = ctre.WPI_TalonSRX(robotmap.backRightDrive)
-        self.lbMotor = ctre.WPI_TalonSRX(robotmap.backLeftDrive)
-        self.lfMotor = ctre.WPI_TalonSRX(robotmap.frontLeftDrive)
+
+        #declare motors
+        self.right_front_motor = ctre.WPI_TalonSRX(robotmap.front_right_drive)
+        self.right_back_motor = ctre.WPI_TalonSRX(robotmap.back_right_drive)
+        self.left_back_motor = ctre.WPI_TalonSRX(robotmap.back_left_drive)
+        self.left_front_motor = ctre.WPI_TalonSRX(robotmap.front_left_drive)
+
+        #declare pneumatic stuff
+        self.hatch_extension_actuator = wpilib.DoubleSolenoid(0, 1)
+        self.hatch_grab_actuator = wpilib.DoubleSolenoid(2, 3)
 
         #configure motors - current limit, ramp rate, etc.
 
-        self.rfMotor.configOpenLoopRamp(0.5)
-        self.rbMotor.configOpenLoopRamp(0.5)
-        self.lbMotor.configOpenLoopRamp(0.5)
-        self.lfMotor.configOpenLoopRamp(0.5)
+        self.right_front_motor.configOpenLoopRamp(0.5)
+        self.right_back_motor.configOpenLoopRamp(0.5)
+        self.left_back_motor.configOpenLoopRamp(0.5)
+        self.left_front_motor.configOpenLoopRamp(0.5)
 
         #group motors
-        self.leftMotors = wpilib.SpeedControllerGroup(self.lbMotor, self.lfMotor)
-        self.rightMotors = wpilib.SpeedControllerGroup(self.rfMotor, self.rbMotor)
+        self.left_drive_motors = wpilib.SpeedControllerGroup(self.left_back_motor, self.left_front_motor)
+        self.right_drive_motors = wpilib.SpeedControllerGroup(self.right_front_motor, self.right_back_motor)
         
         #FBXC motors are oriented differently than on the newest chassis
         if FBXC:
-            self.rightMotors.setInverted(True)
+            self.right_drive_motors.setInverted(True)
         else:
-            self.leftMotors.setInverted(True)
+            self.left_drive_motors.setInverted(True)
         
-        self.drive = wpilib.drive.DifferentialDrive(self.leftMotors, self.rightMotors)
+        self.drive = wpilib.drive.DifferentialDrive(self.left_drive_motors, self.right_drive_motors)
 
         self.oi = OI.OI()
 
@@ -52,7 +63,7 @@ class MyRobot(magicbot.MagicRobot):
 
     def teleopInit(self):
         '''Called when teleop starts; optional'''
-        pass
+        self.oi.process_user_settings()
 
 
     def teleopPeriodic(self):
@@ -60,11 +71,17 @@ class MyRobot(magicbot.MagicRobot):
         try:
             #this part does the wheels
             if self.oi.twoStickMode:
-                self.drivetrain.driveRobot(self.oi.twoStickMode, self.oi.process_driver_input(Side.LEFT), self.oi.process_driver_input(Side.RIGHT), square_inputs=True)
+                self.drivetrain.teleopDriveRobot(self.oi.twoStickMode, self.oi.process_driver_input(Side.LEFT), self.oi.process_driver_input(Side.RIGHT), square_inputs=True)
             else:
-                self.drivetrain.driveRobot(self.oi.twoStickMode, self.oi.process_driver_input(Side.LEFT), self.oi.process_driver_input(Side.RIGHT), square_inputs=True)
+                self.drivetrain.teleopDriveRobot(self.oi.twoStickMode, self.oi.process_driver_input(Side.LEFT), self.oi.process_driver_input(Side.RIGHT), square_inputs=True)
 
-            #this part does the mode switching
+            #operate the hatch mechanism
+            #TODO this stuff
+            #if self.oi.hatch_extend_control():
+            #    self.
+
+            #this part does the mode switching for driver control
+            #TODO: Figure out how to make all references to the controller go into the OI
             if wpilib.XboxController(0).getAButtonPressed():
                 self.oi.beastMode = not self.oi.beastMode
             if wpilib.XboxController(0).getXButtonPressed():

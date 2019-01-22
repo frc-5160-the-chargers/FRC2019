@@ -1,5 +1,6 @@
 import math
 from enum import Enum, unique, auto
+import json
 
 import wpilib
 
@@ -7,16 +8,34 @@ import wpilib
 class Side(Enum):
     LEFT = auto()
     RIGHT = auto()
-
+#TODO: Add feature to get controller bindings from a RIO-based text file for easier settings changes
 class OI:
     DEADZONE = 0.1
 
     def __init__(self):
+
+        self.settings = {}
         
         self.beastMode = False
         self.twoStickMode = False
 
         self.driver_joystick = wpilib.XboxController(0)
+        self.sysop_joystick = wpilib.XboxController(1)
+
+    def write_settings(self):
+        settings = {
+            "hatch_grab" : wpilib.XboxController.Button.kB,
+            "hatch_extend" : wpilib.XboxController.Button.kY
+        }
+
+        with open("/home/lvuser/py/settings.json", 'w') as outfile:
+            json.dump(settings, outfile)
+
+    def process_user_settings(self):
+        with open("/home/lvuser/py/settings.json") as json_file:
+            settings_dict = json.load(json_file)
+            self.settings = settings_dict
+
 
     def curve(self, i):
         return math.pow(i, 3)/1.25
@@ -43,3 +62,11 @@ class OI:
                 return self.__process(self.driver_joystick.getRawAxis(1))
             elif robot_side == Side.RIGHT:
                 return -self.driver_joystick.getRawAxis(4)/2
+    
+    def hatch_extend_control(self):
+        return self.sysop_joystick.getRawButtonPressed(self.settings["hatch_extend"])
+    
+    def hatch_grab_control(self):
+        return self.sysop_joystick.getRawButtonPressed(self.settings["hatch_grab"])
+        
+
