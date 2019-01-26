@@ -11,3 +11,4 @@ Team Code for Destination Deep Space
 * robotpy-cscore
 * numpy
 * opencv
+* v4l-utils

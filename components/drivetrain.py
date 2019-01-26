@@ -39,10 +39,9 @@ class Drivetrain:
         self.left_motor_speed = left_motor_val
         self.right_motor_speed = right_motor_val
         self.square_inputs = square_inputs
-        self.twoStickMode = twoStick
 
     def execute(self):
-        if self.twoStickMode:
+        if self.oi.twoStickMode:
             self.drive.tankDrive(self.left_motor_speed, self.right_motor_speed, self.square_inputs)
         else:
             self.drive.arcadeDrive(self.left_motor_speed, self.right_motor_speed, self.square_inputs)

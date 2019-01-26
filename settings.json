@@ -1,1 +1,5 @@
-{"hatch_grab": 2, "hatch_extend": 4, "shift_button": 2}
+{
+    "hatch_grab": 2,
+    "hatch_extend": 4,
+    "drivetrain_shift": 2
+}

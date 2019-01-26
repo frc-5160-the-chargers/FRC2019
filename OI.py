@@ -8,12 +8,11 @@ import wpilib
 class Side(Enum):
     LEFT = auto()
     RIGHT = auto()
-#TODO: Add feature to get controller bindings from a RIO-based text file for easier settings changes
+
 class OI:
     DEADZONE = 0.1
 
     def __init__(self):
-
         self.settings = {}
         
         self.beastMode = False
@@ -23,20 +22,22 @@ class OI:
         self.sysop_joystick = wpilib.XboxController(1)
 
     #This method is no longer needed but is kept so that the json file can be regenerated if necessary.
-    def write_settings(self):
+    def write_user_settings(self):
         settings = {
             "hatch_grab" : wpilib.XboxController.Button.kB,
-            "hatch_extend" : wpilib.XboxController.Button.kY
+            "hatch_extend" : wpilib.XboxController.Button.kY,
+            "drivetrain_shift" : wpilib.XboxController.Button.kX
         }
 
+        # TODO: Make this use relative paths better
         with open("/home/lvuser/py/settings.json", 'w') as outfile:
             json.dump(settings, outfile)
 
-    def process_user_settings(self):
+    def load_user_settings(self):
+        # TODO: This as well
         with open("/home/lvuser/py/settings.json") as json_file:
             settings_dict = json.load(json_file)
             self.settings = settings_dict
-
 
     def curve(self, i):
         return math.pow(i, 3)/1.25
@@ -64,15 +65,11 @@ class OI:
             elif robot_side == Side.RIGHT:
                 return -self.driver_joystick.getRawAxis(4)/2
     
-    def process_driver_shifting(self):
-        return self.sysop_joystick.getRawButton(self.settings["shift_button"])
+    def drivetrain_shifting_control(self):
+        return self.sysop_joystick.getRawButton(self.settings["drivetrain_shift"])
 
     def hatch_extend_control(self):
         return self.sysop_joystick.getRawButtonPressed(self.settings["hatch_extend"])
     
     def hatch_grab_control(self):
         return self.sysop_joystick.getRawButtonPressed(self.settings["hatch_grab"])
-    
-    def add_two(self):
-        return 2 + 2
-        

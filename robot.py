@@ -12,6 +12,8 @@ from components.drivetrain import Drivetrain
 from components.hatch_extend import HatchExtend
 from components.hatch_grab import HatchGrab
 
+from motorConfigurator import MotorConfigurator
+
 # flags
 FBXC = True
 
@@ -33,18 +35,14 @@ class MyRobot(magicbot.MagicRobot):
         self.left_back_motor = ctre.WPI_TalonSRX(robotmap.back_left_drive)
         self.left_front_motor = ctre.WPI_TalonSRX(robotmap.front_left_drive)
 
-        #declare pneumatic stuff
+        #declare pneumatic components
         self.hatch_extension_actuator = wpilib.DoubleSolenoid(robotmap.hatch_extension_one, robotmap.hatch_extension_two)
         self.hatch_grab_actuator = wpilib.DoubleSolenoid(robotmap.hatch_grab_one, robotmap.hatch_grab_two)
         self.left_shifter = wpilib.DoubleSolenoid(robotmap.shifter_left_one, robotmap.shifter_left_two)
         self.right_shifter = wpilib.DoubleSolenoid(robotmap.shifter_right_one, robotmap.shifter_right_two)
 
         #configure motors - current limit, ramp rate, etc.
-
-        self.right_front_motor.configOpenLoopRamp(0.5)
-        self.right_back_motor.configOpenLoopRamp(0.5)
-        self.left_back_motor.configOpenLoopRamp(0.5)
-        self.left_front_motor.configOpenLoopRamp(0.5)
+        MotorConfigurator.bulk_config_drivetrain(self.right_front_motor, self.right_back_motor, self.left_front_motor, self.left_back_motor)
 
         #group motors
         self.left_drive_motors = wpilib.SpeedControllerGroup(self.left_back_motor, self.left_front_motor)
@@ -63,7 +61,7 @@ class MyRobot(magicbot.MagicRobot):
     def teleopInit(self):
         '''Called when teleop starts; optional'''
         #self.oi.write_settings()
-        self.oi.process_user_settings()
+        self.oi.load_user_settings()
 
 
     def teleopPeriodic(self):
@@ -83,7 +81,7 @@ class MyRobot(magicbot.MagicRobot):
                 self.hatch_grabber.toggle_state()
 
             #shift the drivetrain gear ratios
-            if self.oi.process_driver_shifting():
+            if self.oi.drivetrain_shifting_control():
                 self.drivetrain.shift()
 
             #this part does the mode switching for driver control
@@ -92,8 +90,7 @@ class MyRobot(magicbot.MagicRobot):
                 self.oi.beastMode = not self.oi.beastMode
             if wpilib.XboxController(0).getXButtonPressed():
                 self.oi.twoStickMode = not self.oi.twoStickMode
-
-
+                
         except:
             self.onException()
 
