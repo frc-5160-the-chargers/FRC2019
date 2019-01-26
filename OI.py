@@ -22,6 +22,7 @@ class OI:
         self.driver_joystick = wpilib.XboxController(0)
         self.sysop_joystick = wpilib.XboxController(1)
 
+    #This method is no longer needed but is kept so that the json file can be regenerated if necessary.
     def write_settings(self):
         settings = {
             "hatch_grab" : wpilib.XboxController.Button.kB,
@@ -63,10 +64,15 @@ class OI:
             elif robot_side == Side.RIGHT:
                 return -self.driver_joystick.getRawAxis(4)/2
     
+    def process_driver_shifting(self):
+        return self.sysop_joystick.getRawButton(self.settings["shift_button"])
+
     def hatch_extend_control(self):
         return self.sysop_joystick.getRawButtonPressed(self.settings["hatch_extend"])
     
     def hatch_grab_control(self):
         return self.sysop_joystick.getRawButtonPressed(self.settings["hatch_grab"])
+    
+    def add_two(self):
+        return 2 + 2
         
-
