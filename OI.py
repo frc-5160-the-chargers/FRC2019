@@ -11,7 +11,7 @@ class Side(Enum):
     RIGHT = auto()
 
 class OI:
-    SETTINGSFILE = os.path.dirname(os.path.realpath(__file__)) + "\\settings.json"
+    SETTINGSFILE = os.path.dirname(os.path.realpath(__file__)) + "/settings.json"
 
     DEADZONE = 0.1
 
