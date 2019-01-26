@@ -1,6 +1,7 @@
 import math
 from enum import Enum, unique, auto
 import json
+import os
 
 import wpilib
 
@@ -10,6 +11,8 @@ class Side(Enum):
     RIGHT = auto()
 
 class OI:
+    SETTINGSFILE = os.path.dirname(os.path.realpath(__file__)) + "\\settings.json"
+
     DEADZONE = 0.1
 
     def __init__(self):
@@ -29,13 +32,11 @@ class OI:
             "drivetrain_shift" : wpilib.XboxController.Button.kX
         }
 
-        # TODO: Make this use relative paths better
-        with open("/home/lvuser/py/settings.json", 'w') as outfile:
+        with open(OI.SETTINGSFILE, 'w') as outfile:
             json.dump(settings, outfile)
 
     def load_user_settings(self):
-        # TODO: This as well
-        with open("/home/lvuser/py/settings.json") as json_file:
+        with open(OI.SETTINGSFILE) as json_file:
             settings_dict = json.load(json_file)
             self.settings = settings_dict
 
