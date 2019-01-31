@@ -1,12 +1,11 @@
 from wpilib import DoubleSolenoid
 
 class GearboxShifter:
-    gearbox_shifter_actuator : DoubleSolenoid
-
     LOW = DoubleSolenoid.Value.kForward
     HIGH = DoubleSolenoid.Value.kReverse
 
-    def __init__(self):
+    def __init__(self, actuator):
+        self.gearbox_shifter_actuator = actuator
         self.position = GearboxShifter.LOW
 
     def shift_up(self):

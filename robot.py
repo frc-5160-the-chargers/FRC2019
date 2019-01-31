@@ -11,6 +11,7 @@ import ctre
 from components.drivetrain import Drivetrain
 from components.hatch_extend import HatchExtend
 from components.hatch_grab import HatchGrab
+from components.gearbox_shifter import GearboxShifter
 
 from motorConfigurator import MotorConfigurator
 
@@ -38,8 +39,12 @@ class MyRobot(magicbot.MagicRobot):
         #declare pneumatic components
         self.hatch_extension_actuator = wpilib.DoubleSolenoid(robotmap.hatch_extension_one, robotmap.hatch_extension_two)
         self.hatch_grab_actuator = wpilib.DoubleSolenoid(robotmap.hatch_grab_one, robotmap.hatch_grab_two)
-        self.left_shifter = wpilib.DoubleSolenoid(robotmap.shifter_left_one, robotmap.shifter_left_two)
-        self.right_shifter = wpilib.DoubleSolenoid(robotmap.shifter_right_one, robotmap.shifter_right_two)
+        self.left_shifter_actuator = wpilib.DoubleSolenoid(robotmap.shifter_left_one, robotmap.shifter_left_two)
+        self.right_shifter_actuator = wpilib.DoubleSolenoid(robotmap.shifter_right_one, robotmap.shifter_right_two)
+
+        # shifters
+        self.left_shifter = GearboxShifter(self.left_shifter_actuator)
+        self.right_shifter = GearboxShifter(self.right_shifter_actuator)
 
         #configure motors - current limit, ramp rate, etc.
         MotorConfigurator.bulk_config_drivetrain(self.right_front_motor, self.right_back_motor, self.left_front_motor, self.left_back_motor)
