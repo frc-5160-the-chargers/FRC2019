@@ -29,7 +29,7 @@ class Drivetrain:
 
     # configurable constants
     SHIFTDELAY = .5     # seconds between moving the shifter and restoring driver control
-    SHIFTPOWER = .1    # power to use when shifting
+    SHIFTPOWER = .2    # power to use when shifting
     SHIFTTIMEOUT = 1    # time between shifting allowed
 
     def __init__(self):
@@ -74,6 +74,7 @@ class Drivetrain:
         else:
             self.left_motor_speed = math.copysign(Drivetrain.SHIFTPOWER, self.left_motor_speed)
             self.right_motor_speed = 0
+        self.square_inputs = False
 
         # move solenoids
         self.left_shifter.toggle_shift()
