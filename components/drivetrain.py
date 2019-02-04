@@ -12,10 +12,12 @@ import math
 import OI
 
 class Drivetrain:
-    right_front_motor: ctre.WPI_TalonSRX
-    right_back_motor: ctre.WPI_TalonSRX
-    left_back_motor: ctre.WPI_TalonSRX
-    left_front_motor: ctre.WPI_TalonSRX
+    right_front_motor:  ctre.WPI_TalonSRX
+    right_back_motor:   ctre.WPI_TalonSRX
+    right_top_motor:    ctre.WPI_TalonSRX
+    left_back_motor:    ctre.WPI_TalonSRX
+    left_front_motor:   ctre.WPI_TalonSRX
+    left_top_motor:     ctre.WPI_TalonSRX
 
     left_drive_motors: wpilib.SpeedControllerGroup
     right_drive_motors: wpilib.SpeedControllerGroup

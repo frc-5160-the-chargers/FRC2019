@@ -15,9 +15,6 @@ from components.gearbox_shifter import GearboxShifter
 
 from motorConfigurator import MotorConfigurator
 
-# flags
-FBXC = True
-
 class MyRobot(magicbot.MagicRobot):
 
     #High level components - list these first
@@ -31,34 +28,33 @@ class MyRobot(magicbot.MagicRobot):
         '''Create motors and stuff here'''
 
         #declare motors
-        self.right_front_motor = ctre.WPI_TalonSRX(robotmap.front_right_drive)
-        self.right_back_motor = ctre.WPI_TalonSRX(robotmap.back_right_drive)
-        self.left_back_motor = ctre.WPI_TalonSRX(robotmap.back_left_drive)
-        self.left_front_motor = ctre.WPI_TalonSRX(robotmap.front_left_drive)
+        self.right_front_motor = ctre.WPI_TalonSRX(robotmap.right_front_drive)
+        self.right_back_motor = ctre.WPI_TalonSRX(robotmap.right_back_drive)
+        self.right_top_motor = ctre.WPI_TalonSRX(robotmap.right_top_drive)
+        self.left_back_motor = ctre.WPI_TalonSRX(robotmap.left_back_drive)
+        self.left_front_motor = ctre.WPI_TalonSRX(robotmap.left_front_drive)
+        self.left_top_motor = ctre.WPI_TalonSRX(robotmap.left_top_drive)
 
         #declare pneumatic components
-        self.hatch_extension_actuator = wpilib.DoubleSolenoid(robotmap.hatch_extension_one, robotmap.hatch_extension_two)
-        self.hatch_grab_actuator = wpilib.DoubleSolenoid(robotmap.hatch_grab_one, robotmap.hatch_grab_two)
-        self.left_shifter_actuator = wpilib.DoubleSolenoid(robotmap.shifter_left_one, robotmap.shifter_left_two)
-        self.right_shifter_actuator = wpilib.DoubleSolenoid(robotmap.shifter_right_one, robotmap.shifter_right_two)
+        self.hatch_extension_actuator_left = wpilib.DoubleSolenoid(robotmap.hatch_extension_pcm, robotmap.hatch_extension_left_one, robotmap.hatch_extension_left_two)
+        self.hatch_extension_actuator_right = wpilib.DoubleSolenoid(robotmap.hatch_extension_pcm, robotmap.hatch_extension_right_one, robotmap.hatch_extension_right_two)
+
+        self.hatch_grab_actuator = wpilib.DoubleSolenoid(robotmap.grabber_pcm, robotmap.hatch_grab_one, robotmap.hatch_grab_two)
+        self.left_shifter_actuator = wpilib.DoubleSolenoid(robotmap.shifter_pcm, robotmap.shifter_left_one, robotmap.shifter_left_two)
+        self.right_shifter_actuator = wpilib.DoubleSolenoid(robotmap.shifter_pcm, robotmap.shifter_right_one, robotmap.shifter_right_two)
 
         # shifters
         self.left_shifter = GearboxShifter(self.left_shifter_actuator)
         self.right_shifter = GearboxShifter(self.right_shifter_actuator)
 
         #configure motors - current limit, ramp rate, etc.
-        MotorConfigurator.bulk_config_drivetrain(self.right_front_motor, self.right_back_motor, self.left_front_motor, self.left_back_motor)
+        MotorConfigurator.bulk_config_drivetrain(self.right_front_motor, self.right_back_motor, self.right_top_motor, self.left_front_motor, self.left_back_motor, self.left_top_motor)
 
         #group motors
-        self.left_drive_motors = wpilib.SpeedControllerGroup(self.left_back_motor, self.left_front_motor)
-        self.right_drive_motors = wpilib.SpeedControllerGroup(self.right_front_motor, self.right_back_motor)
-        
-        #FBXC motors are oriented differently than on the newest chassis
-        if FBXC:
-            self.right_drive_motors.setInverted(True)
-        else:
-            self.left_drive_motors.setInverted(True)
-        
+        self.left_drive_motors = wpilib.SpeedControllerGroup(self.left_back_motor, self.left_front_motor, self.left_top_motor)
+        self.right_drive_motors = wpilib.SpeedControllerGroup(self.right_front_motor, self.right_back_motor, self.right_top_motor)
+        self.right_drive_motors.setInverted(True)
+
         self.drive = wpilib.drive.DifferentialDrive(self.left_drive_motors, self.right_drive_motors)
 
         self.oi = OI.OI()
