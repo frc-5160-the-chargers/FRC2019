@@ -7,6 +7,7 @@ right_front_drive = 4
 right_top_drive = 5
 right_back_drive = 6
 
+
 #solenoids
 # there are now two actuators being used to move the extension
 hatch_extension_pcm = 0
@@ -25,3 +26,9 @@ shifter_left_two = 7
 grabber_pcm = 1
 hatch_grab_one = 0
 hatch_grab_two = 1
+
+
+# sensors
+# these are the ultrasonic sensors
+left_ultrasonic_sensor = 0
+right_ultrasonic_sensor = 1
