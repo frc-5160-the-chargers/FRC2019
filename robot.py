@@ -99,6 +99,8 @@ class MyRobot(magicbot.MagicRobot):
             if wpilib.XboxController(0).getXButtonPressed():
                 self.oi.twoStickMode = not self.oi.twoStickMode
                 
+            # test code for ultrasonic sensors, delete later
+            print(self.ultrasonic_sensor_array.get_last_measurement_cm())
         except:
             self.onException()
 

@@ -2,6 +2,7 @@ from wpilib import AnalogInput
 
 class AnalogUltrasonicSensor:
     # these are the ones that use voltage
+    volts_per_cm = 5/1024/10
 
     def __init__(self, port):
         self.port = port
@@ -10,4 +11,4 @@ class AnalogUltrasonicSensor:
         return AnalogInput.getVoltage(self.port)
 
     def getDistanceCm(self):
-        return int(self.getRawOutput())/2
+        return int(self.getRawOutput())*AnalogUltrasonicSensor.volts_per_cm
