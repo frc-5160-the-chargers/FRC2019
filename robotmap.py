@@ -11,21 +11,21 @@ right_back_drive = 6
 #solenoids
 # there are now two actuators being used to move the extension
 hatch_extension_pcm = 0
-hatch_extension_left_one = 0
-hatch_extension_left_two = 1
-hatch_extension_right_one = 2
-hatch_extension_right_two = 3
+hatch_extension_left_front = 4
+hatch_extension_left_back = 5
+hatch_extension_right_front = 6
+hatch_extension_right_back = 7
 
 shifter_pcm = 0
-shifter_right_one = 4
-shifter_right_two = 5
-shifter_left_one = 6
-shifter_left_two = 7
+shifter_right_front = 2
+shifter_right_back = 3
+shifter_left_front = 1
+shifter_left_back = 0
 
 # these should be on a different pcm
 grabber_pcm = 1
-hatch_grab_one = 0
-hatch_grab_two = 1
+hatch_grab_front = 0
+hatch_grab_back = 1
 
 
 # sensors
