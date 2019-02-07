@@ -1,11 +1,11 @@
 # drivetrain
 # note that front is the motor towards the front, back is back, and top is the one physically above the others
-left_front_drive = 1
-left_top_drive = 2
-left_back_drive = 3
-right_front_drive = 4
-right_top_drive = 5
-right_back_drive = 6
+left_front_drive = 5
+left_top_drive = 6
+left_bottom_drive = 7
+right_back_drive = 4
+right_top_drive = 2
+right_bottom_drive = 3
 
 
 #solenoids

@@ -30,10 +30,10 @@ class MyRobot(magicbot.MagicRobot):
         '''Create motors and stuff here'''
 
         #declare motors
-        self.right_front_motor = ctre.WPI_TalonSRX(robotmap.right_front_drive)
-        self.right_back_motor = ctre.WPI_TalonSRX(robotmap.right_back_drive)
+        self.right_front_motor = ctre.WPI_TalonSRX(robotmap.right_back_drive)
+        self.right_back_motor = ctre.WPI_TalonSRX(robotmap.right_bottom_drive)
         self.right_top_motor = ctre.WPI_TalonSRX(robotmap.right_top_drive)
-        self.left_back_motor = ctre.WPI_TalonSRX(robotmap.left_back_drive)
+        self.left_back_motor = ctre.WPI_TalonSRX(robotmap.left_bottom_drive)
         self.left_front_motor = ctre.WPI_TalonSRX(robotmap.left_front_drive)
         self.left_top_motor = ctre.WPI_TalonSRX(robotmap.left_top_drive)
 
