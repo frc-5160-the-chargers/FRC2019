@@ -55,6 +55,9 @@ class Drivetrain:
         """
         return time.time() - self.last_shift_time
 
+    def print_velocities(self):
+        print("right side v: " + self.right_front_motor.getQuadratureVelocity() + "left side v: " + self.left_front_motor.getQuadratureVelocity())
+
 
     def shift(self):
         """

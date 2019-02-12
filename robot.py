@@ -101,6 +101,8 @@ class MyRobot(magicbot.MagicRobot):
                 
             # test code for ultrasonic sensors, delete later
             print(self.ultrasonic_sensor_array.get_last_measurement_cm())
+
+            self.drivetrain.print_velocities()
         except:
             self.onException()
 

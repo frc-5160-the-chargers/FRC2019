@@ -8,6 +8,10 @@ class GearboxShifter:
         self.gearbox_shifter_actuator = actuator
         self.position = GearboxShifter.LOW
 
+    def ready_to_shift(self):
+        """Check motor velocities from encoders to determine if ready to shift. Return boolean. """
+        pass
+
     def shift_up(self):
         self.position = GearboxShifter.HIGH
     
