@@ -55,7 +55,6 @@ class MyRobot(magicbot.MagicRobot):
         #group motors
         self.left_drive_motors = wpilib.SpeedControllerGroup(self.left_back_motor, self.left_front_motor, self.left_top_motor)
         self.right_drive_motors = wpilib.SpeedControllerGroup(self.right_front_motor, self.right_back_motor, self.right_top_motor)
-        self.right_drive_motors.setInverted(True)
 
         # ultrasonic sensors
         self.ultrasonic_sensor_left = AnalogUltrasonicSensor(robotmap.left_ultrasonic_sensor)
