@@ -33,6 +33,7 @@ class Drivetrain:
     SHIFTDELAY = .5     # seconds between moving the shifter and restoring driver control
     SHIFTPOWER = .2    # power to use when shifting
     SHIFTTIMEOUT = 1    # time between shifting allowed
+    REQUIRED_SHIFT_SPEED = 100
 
     def __init__(self):
         self.left_motor_speed = 0
@@ -56,8 +57,10 @@ class Drivetrain:
         return time.time() - self.last_shift_time
 
     def print_velocities(self):
-        print("right side v: " + self.right_front_motor.getQuadratureVelocity() + "left side v: " + self.left_front_motor.getQuadratureVelocity())
+        print("right side v: " + str(self.right_front_motor.getQuadratureVelocity()) + "left side v: " + str(self.left_front_motor.getQuadratureVelocity()))
 
+    def ready_to_shift(self):
+        return abs(self.left_front_motor.getQuadratureVelocity()) > self.REQUIRED_SHIFT_SPEED
 
     def shift(self):
         """
@@ -65,25 +68,10 @@ class Drivetrain:
             :param self: 
         """
         # first make sure that time is ok for shifting
-        if self.get_shift_time() < Drivetrain.SHIFTTIMEOUT:
-            return
-        
-        # set flags
-        self.shifting = True
-        self.last_shift_time = time.time()
-
-        # set motor power
-        if self.oi.twoStickMode:
-            self.left_motor_speed = math.copysign(Drivetrain.SHIFTPOWER, self.left_motor_speed)
-            self.right_motor_speed = math.copysign(Drivetrain.SHIFTPOWER, self.right_motor_speed)
-        else:
-            self.left_motor_speed = math.copysign(Drivetrain.SHIFTPOWER, self.left_motor_speed)
-            self.right_motor_speed = 0
-        self.square_inputs = False
-
+        if self.ready_to_shift():
         # move solenoids
-        self.left_shifter.toggle_shift()
-        self.right_shifter.toggle_shift()
+            self.left_shifter.toggle_shift()
+            self.right_shifter.toggle_shift()
         
 
     def execute(self):

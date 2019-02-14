@@ -17,8 +17,8 @@ hatch_extension_right_front = 6
 hatch_extension_right_back = 7
 
 shifter_pcm = 0
-shifter_right_front = 2
-shifter_right_back = 3
+shifter_right_front = 3
+shifter_right_back = 2
 shifter_left_front = 1
 shifter_left_back = 0
 

@@ -67,7 +67,7 @@ class OI:
                 return -self.driver_joystick.getRawAxis(4)/2
     
     def drivetrain_shifting_control(self):
-        return self.driver_joystick.getRawButton(self.settings["drivetrain_shift"])
+        return self.driver_joystick.getBButtonPressed()
 
     def hatch_extend_control(self):
         return self.sysop_joystick.getRawButtonPressed(self.settings["hatch_extend"])

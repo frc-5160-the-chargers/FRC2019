@@ -55,7 +55,6 @@ class MyRobot(magicbot.MagicRobot):
         #group motors
         self.left_drive_motors = wpilib.SpeedControllerGroup(self.left_back_motor, self.left_front_motor, self.left_top_motor)
         self.right_drive_motors = wpilib.SpeedControllerGroup(self.right_front_motor, self.right_back_motor, self.right_top_motor)
-        self.right_drive_motors.setInverted(True)
 
         # ultrasonic sensors
         self.ultrasonic_sensor_left = AnalogUltrasonicSensor(robotmap.left_ultrasonic_sensor)
@@ -98,10 +97,8 @@ class MyRobot(magicbot.MagicRobot):
                 self.oi.beastMode = not self.oi.beastMode
             if wpilib.XboxController(0).getXButtonPressed():
                 self.oi.twoStickMode = not self.oi.twoStickMode
-                
-            # test code for ultrasonic sensors, delete later
-            print(self.ultrasonic_sensor_array.get_last_measurement_cm())
 
+            print(self.drivetrain.ready_to_shift())
             self.drivetrain.print_velocities()
         except:
             self.onException()
