@@ -24,8 +24,8 @@ shifter_left_back = 0
 
 # these should be on a different pcm
 grabber_pcm = 1
-hatch_grab_front = 0
-hatch_grab_back = 1
+hatch_grab_front = 1
+hatch_grab_back = 0
 
 
 # sensors
