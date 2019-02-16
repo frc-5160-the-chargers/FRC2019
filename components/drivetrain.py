@@ -5,6 +5,7 @@ import wpilib.drive
 from wpilib import DoubleSolenoid
 from enum import Enum, unique, auto
 from components.gearbox_shifter import GearboxShifter
+from components import navx_handler
 
 import time
 import math
@@ -28,6 +29,8 @@ class Drivetrain:
 
     left_shifter : GearboxShifter
     right_shifter : GearboxShifter
+
+    navx_handler : navx_handler.NavXHandler
 
     # configurable constants
     SHIFTDELAY = .5     # seconds between moving the shifter and restoring driver control
@@ -91,7 +94,62 @@ class Drivetrain:
         # move solenoids
             self.left_shifter.toggle_shift()
             self.right_shifter.toggle_shift()
-        
+
+    def set_motor_powers(self):
+        """
+        set the power of the motors using the internal speeds
+            :param self:
+        """
+        self.left_drive_motors.set(self.left_motor_speed)
+        self.right_drive_motors.set(self.right_motor_speed)
+
+    def stop_motors(self):
+        """
+        set both motor sets to be 0 power
+            :param self: 
+        """
+        self.left_motor_speed = 0
+        self.right_motor_speed = 0
+        self.set_motor_powers()
+
+    def turn_to_position(self, degrees, tolerance=1, timeout=3, timeStable=0.5):
+        """
+        turn to a given position (degrees) using PID
+            :param self: 
+            :param degrees: the position to turn to
+            :param tolerance=1: the tolerance (in degrees)
+            :param timeout=3: the timeout (in seconds) or length to run until its done
+            :param timeStable=0.5: the number of seconds to keep the error within the tolerance before ending
+            :returns: true if done because error is within tolerance
+        """   # TODO: Tune these values
+        kP = 0
+        kI = 0
+        kD = 0
+        kLeft = -1
+        kRight = 1
+        integral = 0
+        startTime = time.time()
+        error = tolerance+1
+        lastError = error
+        lastTime = time.time()
+        lastTimeNotInTolerance = time.time()
+        self.navx_handler.reset_rotation()
+        while time.time() < startTime+timeout:
+            dT = time.time() - lastTime
+            error = degrees-self.navx_handler.get_rotation()
+            integral += dT*error
+            derivative = (error-lastError)/dT
+            pidOutput = kP*error + kI*integral + kD*derivative
+            self.left_motor_speed = pidOutput*kLeft
+            self.right_motor_speed = pidOutput*kRight
+            self.set_motor_powers()
+            if abs(error) > tolerance:
+                lastTimeNotInTolerance = time.time()
+            if time.time()-lastTimeNotInTolerance > timeStable:
+                self.stop_motors()
+                return True
+        self.stop_motors()
+        return False
 
     def execute(self):
         if self.oi.twoStickMode:
