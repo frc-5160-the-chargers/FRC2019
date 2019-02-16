@@ -2,6 +2,8 @@ import magicbot
 import wpilib
 import wpilib.drive
 
+import navx
+
 import robotmap
 import OI
 from OI import Side
@@ -14,6 +16,7 @@ from components.hatch_grab import HatchGrab
 from components.gearbox_shifter import GearboxShifter
 from components.ultrasonic_sensor_array import UltrasonicSensorArray
 from components.analog_ultrasonic_sensor import AnalogUltrasonicSensor
+from components.navx_handler import NavXHandler
 
 from motorConfigurator import MotorConfigurator
 
@@ -25,6 +28,8 @@ class MyRobot(magicbot.MagicRobot):
     drivetrain : Drivetrain
     hatch_grabber : HatchGrab
     hatch_extension : HatchExtend
+    navx_handler : NavXHandler
+    # ultrasonic_sensor_array : UltrasonicSensorArray
 
     def createObjects(self):
         '''Create motors and stuff here'''
@@ -59,11 +64,13 @@ class MyRobot(magicbot.MagicRobot):
         # ultrasonic sensors
         self.ultrasonic_sensor_left = AnalogUltrasonicSensor(robotmap.left_ultrasonic_sensor)
         self.ultrasonic_sensor_right = AnalogUltrasonicSensor(robotmap.right_ultrasonic_sensor)
-        self.ultrasonic_sensor_array = UltrasonicSensorArray(self.ultrasonic_sensor_left, self.ultrasonic_sensor_right)
 
+        # navx board
+        self.navx = navx.AHRS.create_spi()
         self.drive = wpilib.drive.DifferentialDrive(self.left_drive_motors, self.right_drive_motors)
 
         self.oi = OI.OI()
+
 
     def teleopInit(self):
         '''Called when teleop starts; optional'''
@@ -99,6 +106,7 @@ class MyRobot(magicbot.MagicRobot):
                 self.oi.twoStickMode = not self.oi.twoStickMode
 
             print(self.drivetrain.ready_to_shift())
+            print(self.navx_handler.get_rotation())
             self.drivetrain.print_velocities()
         except:
             self.onException()
