@@ -24,7 +24,7 @@ class OI:
         self.driver_joystick = wpilib.XboxController(0)
         self.sysop_joystick = wpilib.XboxController(1)
 
-    #This method is no longer needed but is kept so that the json file can be regenerated if necessary.
+    #This method is no longer used but is kept so that the json file can be regenerated if necessary.
     def write_user_settings(self):
         settings = {
             "hatch_grab" : wpilib.XboxController.Button.kB,
@@ -39,6 +39,36 @@ class OI:
         with open(OI.SETTINGSFILE) as json_file:
             settings_dict = json.load(json_file)
             self.settings = settings_dict
+
+    def getButtonPressed(self, controller, button):
+        """
+        Get button pressed on a given controller, but do it so that the config file can be used
+            param self
+            param controller: the wpilib.XboxController object to get button data from
+            param button: the desired button to check, determined from the config file
+        """
+        if button == wpilib.XboxController.Button.kA:
+            return controller.getAButtonPressed()
+        elif button == wpilib.XboxController.Button.kB:
+            return controller.getBButtonPressed()
+        elif button == wpilib.XboxController.Button.kBack:
+            return controller.getBackButtonPressed()
+        elif button == wpilib.XboxController.Button.kBumperLeft:
+            return controller.getBumperPressed(wpilib.XboxController.Hand.kLeft)
+        elif button == wpilib.XboxController.Button.kBumperRight:
+            return controller.getBumperPressed(wpilib.XboxController.Hand.kRight)
+        elif button == wpilib.XboxController.Button.kStart:
+            return controller.getStartButtonPressed()
+        elif button == wpilib.XboxController.Button.kStickLeft:
+            return controller.getStickButtonPressed(wpilib.XboxController.Hand.kLeft)
+        elif button == wpilib.XboxController.Button.kStickRight:
+            return controller.getStickButtonPressed(wpilib.XboxController.Hand.kRight)
+        elif button == wpilib.XboxController.Button.kX:
+            return controller.getXButtonPressed()
+        elif button == wpilib.XboxController.Button.kY:
+            return controller.getYButtonPressed()
+        else:
+            print("Oopsie woopsie! There's a problem in the getButtonPressed() function!")
 
     def curve(self, i):
         return math.pow(i, 3)/1.25
@@ -67,7 +97,7 @@ class OI:
                 return -self.driver_joystick.getRawAxis(4)/2
     
     def drivetrain_shifting_control(self):
-        return self.driver_joystick.getBButtonPressed()
+        return self.getButtonPressed(self.driver_joystick, self.settings["drivetrain_shift"])
 
     def hatch_extend_control(self):
         return self.sysop_joystick.getRawButtonPressed(self.settings["hatch_extend"])
