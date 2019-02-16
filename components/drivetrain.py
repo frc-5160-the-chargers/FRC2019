@@ -91,7 +91,7 @@ class Drivetrain:
         # move solenoids
             self.left_shifter.toggle_shift()
             self.right_shifter.toggle_shift()
-        
+            
 
     def execute(self):
         if self.oi.twoStickMode:
