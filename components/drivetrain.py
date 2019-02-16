@@ -5,6 +5,7 @@ import wpilib.drive
 from wpilib import DoubleSolenoid
 from enum import Enum, unique, auto
 from components.gearbox_shifter import GearboxShifter
+from utils import PIDController
 
 import time
 import math
@@ -61,7 +62,7 @@ class Drivetrain:
     def get_right_position(self):
         return self.right_top_motor.getQuadraturePosition()
     def get_left_position(self):
-        return self.left_front_motor.getQuadraturePosition()
+        return -self.left_front_motor.getQuadraturePosition()
     def get_average_position(self):
         return (self.get_right_position() + self.get_left_position) / 2.0
     
@@ -91,7 +92,13 @@ class Drivetrain:
         # move solenoids
             self.left_shifter.toggle_shift()
             self.right_shifter.toggle_shift()
-            
+    
+    def drive_set_distance(self, distance):
+        #distance measured in encoder ticks
+        measurement = self.get_average_position()
+        pid = PIDController(measurement)
+        pid.set_setpoint(distance)
+        self.drive.tankDrive(pid.pID())
 
     def execute(self):
         if self.oi.twoStickMode:
