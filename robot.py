@@ -70,6 +70,8 @@ class MyRobot(magicbot.MagicRobot):
         #self.oi.write_settings()
         self.oi.load_user_settings()
 
+        self.drivetrain.reset_encoders()
+
 
     def teleopPeriodic(self):
         '''Called on each iteration of the control loop'''
@@ -98,8 +100,12 @@ class MyRobot(magicbot.MagicRobot):
             if wpilib.XboxController(0).getXButtonPressed():
                 self.oi.twoStickMode = not self.oi.twoStickMode
 
-            print(self.drivetrain.ready_to_shift())
-            self.drivetrain.print_velocities()
+            #print(self.drivetrain.ready_to_shift())
+            #self.drivetrain.print_velocities()
+
+            print("left: " + str(self.drivetrain.get_left_position()) + "right: " + str(self.drivetrain.get_right_position()))
+            if self.drivetrain.get_right_position() >= 10000 or self.drivetrain.get_left_position() >= 10000:
+                self.drivetrain.reset_encoders()
         except:
             self.onException()
 
