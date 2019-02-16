@@ -76,6 +76,7 @@ class MyRobot(magicbot.MagicRobot):
         '''Called when teleop starts; optional'''
         #self.oi.write_settings()
         self.oi.load_user_settings()
+        self.navx_handler.reset_rotation()
 
 
     def teleopPeriodic(self):

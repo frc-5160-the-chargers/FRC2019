@@ -7,10 +7,10 @@ class NavXHandler:
         self.last_rotation = 0# self.get_rotation()
 
     def get_rotation(self):
-        return self.navx.getRawGyroZ()
+        return self.navx.getAngle()
 
     def reset_rotation(self):
-        self.navx.reset() 
+        self.navx.reset()
 
     def execute(self):
         self.last_rotation = self.get_rotation()
