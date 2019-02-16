@@ -51,7 +51,7 @@ class Drivetrain:
 
     #get velocities of drivetrain encoders
     def get_right_velocity(self):
-        return self.right_front_motor.getQuadratureVelocity()
+        return self.right_top_motor.getQuadratureVelocity()
     def get_left_velocity(self):
         return self.left_front_motor.getQuadratureVelocity()
     def get_average_velocity(self):
@@ -59,7 +59,7 @@ class Drivetrain:
 
     #get positions of drivetrain encoders
     def get_right_position(self):
-        return self.right_front_motor.getQuadraturePosition()
+        return self.right_top_motor.getQuadraturePosition()
     def get_left_position(self):
         return self.left_front_motor.getQuadraturePosition()
     def get_average_position(self):
@@ -67,7 +67,7 @@ class Drivetrain:
     
     #reset either or both drive encoders
     def reset_left_encoder(self):
-        self.right_front_motor.setQuadraturePosition(0)
+        self.right_top_motor.setQuadraturePosition(0)
     def reset_right_encoder(self):
         self.left_front_motor.setQuadraturePosition(0)
     def reset_encoders(self):
