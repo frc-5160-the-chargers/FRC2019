@@ -1,5 +1,6 @@
 {
     "hatch_grab": 2,
     "hatch_extend": 4,
-    "drivetrain_shift": 6
+    "drivetrain_shift": 6,
+    "drive_foot": 4
 }

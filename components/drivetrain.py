@@ -39,6 +39,8 @@ class Drivetrain:
     SHIFTTIMEOUT = 1    # time between shifting allowed
     REQUIRED_SHIFT_SPEED = 100
 
+    TICKS_PER_INCH = 224.6
+
     def __init__(self):
         self.left_motor_speed = 0
         self.right_motor_speed = 0
@@ -46,6 +48,8 @@ class Drivetrain:
 
         self.last_shift_time = 0
         self.shifting = False
+
+        self.pid = PIDController(self.TICKS_PER_INCH * 12)
 
     def teleop_drive_robot(self, twoStick, left_motor_val=0, right_motor_val=0, square_inputs=False):
         if not self.shifting:
@@ -67,7 +71,7 @@ class Drivetrain:
     def get_left_position(self):
         return -self.left_front_motor.getQuadraturePosition()
     def get_average_position(self):
-        return (self.get_right_position() + self.get_left_position) / 2.0
+        return (self.get_right_position() + self.get_left_position()) / 2.0
     
     #reset either or both drive encoders
     def reset_left_encoder(self):
@@ -96,12 +100,11 @@ class Drivetrain:
             self.left_shifter.toggle_shift()
             self.right_shifter.toggle_shift()
     
-    def drive_set_distance(self, distance):
+    def drive_set_distance(self):
         #distance measured in encoder ticks
-        measurement = self.get_average_position()
-        pid = PIDController(measurement)
-        pid.set_setpoint(distance)
-        self.drive.tankDrive(pid.pID())
+        self.pid.measurement = self.get_average_position()
+        pid_val = self.pid.pID()
+        self.drive.tankDrive(pid_val, pid_val)
 
     def set_motor_powers(self):
         """

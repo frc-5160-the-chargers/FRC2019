@@ -107,13 +107,13 @@ class MyRobot(magicbot.MagicRobot):
                 self.oi.beastMode = not self.oi.beastMode
             if wpilib.XboxController(0).getXButtonPressed():
                 self.oi.twoStickMode = not self.oi.twoStickMode
+            
+            self.drivetrain.drive_set_distance()
 
             #print(self.drivetrain.ready_to_shift())
             #self.drivetrain.print_velocities()
 
             print("left: " + str(self.drivetrain.get_left_position()) + "right: " + str(self.drivetrain.get_right_position()))
-            if self.drivetrain.get_right_position() >= 10000 or self.drivetrain.get_left_position() >= 10000:
-                self.drivetrain.reset_encoders()
         except:
             self.onException()
 

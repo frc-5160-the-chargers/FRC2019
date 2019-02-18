@@ -2,11 +2,11 @@ import time
 
 class PIDController:
 
-    def __init__(self, measurement):
-        self.setpoint = 0
-        self.measurement = measurement
+    def __init__(self, setpoint):
+        self.setpoint = setpoint
+        self.measurement = 0
 
-        self.kP = 1
+        self.kP = 0.2
         self.kI = 0
         self.kD = 0
 
@@ -21,7 +21,7 @@ class PIDController:
     def pID(self):
         #calculate time in ms since last called
         current_time = int(round(time.time() * 1000))
-        dT = current_time - self.last_time
+        dT = current_time - self.last_time + 1
 
         #error = target - actual
         error = self.setpoint - self.measurement

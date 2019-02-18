@@ -96,6 +96,9 @@ class OI:
             elif robot_side == Side.RIGHT:
                 return -self.driver_joystick.getRawAxis(4)/2
     
+    def drive_one_foot(self):
+        return self.getButtonPressed(self.driver_joystick, self.settings["drive_foot"])
+
     def drivetrain_shifting_control(self):
         return self.getButtonPressed(self.driver_joystick, self.settings["drivetrain_shift"])
 
