@@ -71,6 +71,8 @@ class MyRobot(magicbot.MagicRobot):
 
         self.oi = OI.OI()
 
+        wpilib.CameraServer.launch()
+
 
     def teleopInit(self):
         '''Called when teleop starts; optional'''

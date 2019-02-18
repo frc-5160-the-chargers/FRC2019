@@ -7,7 +7,8 @@ class MotorConfigurator:
         Configure a given motor controller for drivetrain usage
             :param motor:ctre.WPI_TalonSRX: The motor to be configured
         """
-        pass
+        motor.configOpenLoopRamp(1)
+        motor.configClosedLoopRamp(1)
 
     @staticmethod
     def bulk_config_drivetrain(*args):

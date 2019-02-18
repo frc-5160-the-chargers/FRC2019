@@ -133,7 +133,7 @@ class Drivetrain:
             :param timeStable=0.5: the number of seconds to keep the error within the tolerance before ending
             :returns: true if done because error is within tolerance
         """   # TODO: Tune these values
-        kP = 0
+        kP = 1
         kI = 0
         kD = 0
         kLeft = -1

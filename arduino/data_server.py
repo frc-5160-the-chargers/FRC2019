@@ -1,7 +1,7 @@
 import time
 import serial
 import re
-
+from threading import Thread
 
 class Vector:
     def __init__(self, inStr):
@@ -27,22 +27,35 @@ class Vector:
     def getYFromX(self, x):
         return self.slope*x+self.yIntercept
 
+class ArduinoServer:
+    def __init__(self):
+        self.serialConnnection = serial.Serial(
+            port="COM20",
+            baudrate=9600,
+            parity=serial.PARITY_ODD,
+            stopbits=serial.STOPBITS_TWO,
+            bytesize=serial.SEVENBITS
+        )
 
-serialConnnection = serial.Serial(
-    port="COM20",
-    baudrate=9600,
-    parity=serial.PARITY_ODD,
-    stopbits=serial.STOPBITS_TWO,
-    bytesize=serial.SEVENBITS
-)
+        self.pattern = re.compile(r"vector: (\([0-9]+ [0-9]+\) ){2}index: [0-9]+ flags [0-9]+\r\n")
 
-serialConnnection.isOpen()
+        self.lastVector = None
+        self.vectorDetected = False
 
-pattern = re.compile(r"vector: (\([0-9]+ [0-9]+\) ){2}index: [0-9]+ flags [0-9]+\r\n")
+    def collectData(self):
+        line = str(self.serialConnnection.readline().decode())
+        if self.pattern.match(line) != None:
+            vector = Vector(line)
+            self.vectorDetected = vector.vectorDetected
+            self.lastVector = vector
+    
+    def startServer(self):
+        thread = Thread(target = self.runServer)
+        thread.start()
 
-while True:
-    line = str(serialConnnection.readline().decode())
-    if pattern.match(line) != None:
-        print(str(Vector(line)))
+    def runServer(self):
+        while True:
+            self.collectData()
 
-serialConnnection.close()
+    def getVector(self):
+        return None if not self.vectorDetected else self.lastVector
