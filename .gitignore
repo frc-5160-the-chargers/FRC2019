@@ -3,3 +3,4 @@ nodeids
 .pytest_cache
 __pycache__
 .vscode
+out.txt
