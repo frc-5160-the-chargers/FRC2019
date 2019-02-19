@@ -10,7 +10,7 @@ import robotmap
 import OI
 from OI import Side
 
-from arduino.data_server import ArduinoServer
+# from arduino.data_server import ArduinoServer
 from motorConfigurator import MotorConfigurator
 
 from components.drivetrain import Drivetrain
