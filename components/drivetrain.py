@@ -49,7 +49,8 @@ class Drivetrain:
         self.last_shift_time = 0
         self.shifting = False
 
-        self.pid = PIDController(kP=0.2)
+        self.pid = PIDController(kP=0.0002)
+        self.pid.reset()
 
     def teleop_drive_robot(self, twoStick, left_motor_val=0, right_motor_val=0, square_inputs=False):
         if not self.shifting:
