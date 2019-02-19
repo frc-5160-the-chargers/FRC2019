@@ -58,4 +58,6 @@ class PIDController:
 
         self.last_time = current_time
 
-        return self.kP * error + self.kI * self.integral + self.kD * derivative
+        a = self.kP * error + self.kI * self.integral + self.kD * derivative
+        print(a)
+        return a

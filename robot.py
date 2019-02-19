@@ -10,7 +10,7 @@ import robotmap
 import OI
 from OI import Side
 
-from arduino.data_server import ArduinoServer
+#from arduino.data_server import ArduinoServer
 from motorConfigurator import MotorConfigurator
 
 from components.drivetrain import Drivetrain
@@ -95,6 +95,8 @@ class MyRobot(magicbot.MagicRobot):
         self.navx_handler.reset_rotation()
         self.drivetrain.reset_encoders()
 
+        self.drivetrain.pid.setpoint = self.drivetrain.TICKS_PER_INCH * 12
+
 
     def teleopPeriodic(self):
         """
@@ -126,7 +128,10 @@ class MyRobot(magicbot.MagicRobot):
             if wpilib.XboxController(0).getXButtonPressed():
                 self.oi.twoStickMode = not self.oi.twoStickMode
 
-            print("Left position: {}\t Right positon: {}".format(self.drivetrain.get_left_position(), self.drivetrain.get_right_position()))
+            
+            self.drivetrain.drive_set_distance()
+
+            #print("Left position: {}\t Right positon: {}".format(self.drivetrain.get_left_position(), self.drivetrain.get_right_position()))
             # print("Line detected: {}".format(str(self.pixy_cam_server.getVector())))
         
         except:
