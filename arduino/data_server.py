@@ -28,9 +28,9 @@ class Vector:
         return self.slope*x+self.yIntercept
 
 class ArduinoServer:
-    def __init__(self):
+    def __init__(self, comPort="COM20"):
         self.serialConnnection = serial.Serial(
-            port="COM20",
+            port=comPort,
             baudrate=9600,
             parity=serial.PARITY_ODD,
             stopbits=serial.STOPBITS_TWO,

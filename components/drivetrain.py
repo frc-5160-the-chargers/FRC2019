@@ -49,7 +49,7 @@ class Drivetrain:
         self.last_shift_time = 0
         self.shifting = False
 
-        self.pid = PIDController(self.TICKS_PER_INCH * 12)
+        self.pid = PIDController(kP=0.2)
 
     def teleop_drive_robot(self, twoStick, left_motor_val=0, right_motor_val=0, square_inputs=False):
         if not self.shifting:
@@ -102,8 +102,7 @@ class Drivetrain:
     
     def drive_set_distance(self):
         #distance measured in encoder ticks
-        self.pid.measurement = self.get_average_position()
-        pid_val = self.pid.pID()
+        pid_val = self.pid.pid(self.get_average_position())
         self.drive.tankDrive(pid_val, pid_val)
 
     def set_motor_powers(self):
@@ -131,34 +130,37 @@ class Drivetrain:
             :param tolerance=1: the tolerance (in degrees)
             :param timeout=3: the timeout (in seconds) or length to run until its done
             :param timeStable=0.5: the number of seconds to keep the error within the tolerance before ending
-            :returns: true if done because error is within tolerance
-        """   # TODO: Tune these values
-        kP = 1
-        kI = 0
-        kD = 0
+            :returns: True if done because error is within tolerance otherwise False
+        """
+        # TODO: Tune these values and integrate with PID class
+        pid = PIDController()
+        pid.set_setpoint_reset(degrees)
+
+        # constants to apply to each motor side
         kLeft = -1
         kRight = 1
-        integral = 0
-        startTime = time.time()
+        
         error = tolerance+1
-        lastError = error
-        lastTime = time.time()
+        startTime = time.time()
         lastTimeNotInTolerance = time.time()
+        
         self.navx_handler.reset_rotation()
+
         while time.time() < startTime+timeout:
-            dT = time.time() - lastTime
-            error = degrees-self.navx_handler.get_rotation()
-            integral += dT*error
-            derivative = (error-lastError)/dT
-            pidOutput = kP*error + kI*integral + kD*derivative
+            pidOutput = pid.pid(self.navx_handler.get_rotation())
+            
             self.left_motor_speed = pidOutput*kLeft
             self.right_motor_speed = pidOutput*kRight
+            
             self.set_motor_powers()
+            
             if abs(error) > tolerance:
                 lastTimeNotInTolerance = time.time()
+            
             if time.time()-lastTimeNotInTolerance > timeStable:
                 self.stop_motors()
                 return True
+        
         self.stop_motors()
         return False
 
@@ -171,6 +173,6 @@ class Drivetrain:
         if self.oi.drivetrain_shifting_control():
             self.shift()
 
-        #I don't think this has to exist but it might so I commented it out
+        # I don't think this has to exist but it might so I commented it out
         self.left_shifter.execute()
         self.right_shifter.execute()

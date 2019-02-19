@@ -30,8 +30,9 @@ hatch_grab_back = 0
 
 # sensors
 # these are the ultrasonic sensors
-left_ultrasonic_sensor = 0
-right_ultrasonic_sensor = 1
+# TODO welp these don't actually exist anymore.
+# left_ultrasonic_sensor = 0
+# right_ultrasonic_sensor = 1
 
 # limit switches for cargo mechanism
 cargo_limit_switch_outside = 0
