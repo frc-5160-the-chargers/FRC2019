@@ -79,8 +79,8 @@ class MyRobot(magicbot.MagicRobot):
         self.oi = OI.OI()
 
         # code to run the pixy cam server
-        self.pixy_cam_server = ArduinoServer()
-        self.pixy_cam_server.startServer()          # launch a new thread for it
+        # self.pixy_cam_server = ArduinoServer()
+        # self.pixy_cam_server.startServer()          # launch a new thread for it
 
         # launch automatic camera capturing for main drive cam
         wpilib.CameraServer.launch()
@@ -127,7 +127,7 @@ class MyRobot(magicbot.MagicRobot):
                 self.oi.twoStickMode = not self.oi.twoStickMode
 
             print("Left position: {}\t Right positon: {}".format(self.drivetrain.get_left_position(), self.drivetrain.get_right_position()))
-            print("Line detected: {}".format(str(self.pixy_cam_server.getVector())))
+            # print("Line detected: {}".format(str(self.pixy_cam_server.getVector())))
         
         except:
             self.onException()
