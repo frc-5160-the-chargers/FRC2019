@@ -87,3 +87,10 @@ class OI:
     
     def hatch_grab_control(self):
         return self.sysop_joystick.getRawButtonPressed(self.settings["hatch_grab"])
+
+    def process_cargo_control(self):
+        i = (self.sysop_joystick.getRawAxis(1)**3)/2
+        if abs(self.sysop_joystick.getRawAxis(1)) > 0.1:
+            return i
+        else:
+            return 0

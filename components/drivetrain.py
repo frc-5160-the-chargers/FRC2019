@@ -134,12 +134,12 @@ class Drivetrain:
             :returns: True if done because error is within tolerance otherwise False
         """
         # TODO: Tune these values and integrate with PID class
-        pid = PIDController()
+        pid = PIDController(kP=0.05)
         pid.set_setpoint_reset(degrees)
 
         # constants to apply to each motor side
-        kLeft = -1
-        kRight = 1
+        kLeft = -0.5
+        kRight = -0.5
         
         error = tolerance+1
         startTime = time.time()
@@ -149,6 +149,8 @@ class Drivetrain:
 
         while time.time() < startTime+timeout:
             pidOutput = pid.pid(self.navx_handler.get_rotation())
+
+            print(pid.previous_error)
             
             self.left_motor_speed = pidOutput*kLeft
             self.right_motor_speed = pidOutput*kRight

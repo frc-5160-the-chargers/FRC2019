@@ -28,7 +28,7 @@ class Vector:
         return self.slope*x+self.yIntercept
 
 class ArduinoServer:
-    def __init__(self, comPort="COM20"):
+    def __init__(self, comPort="/dev/ttyACM0"):
         self.serialConnnection = serial.Serial(
             port=comPort,
             baudrate=9600,
@@ -43,11 +43,14 @@ class ArduinoServer:
         self.vectorDetected = False
 
     def collectData(self):
-        line = str(self.serialConnnection.readline().decode())
-        if self.pattern.match(line) != None:
-            vector = Vector(line)
-            self.vectorDetected = vector.vectorDetected
-            self.lastVector = vector
+        try:
+            line = str(self.serialConnnection.readline().decode())
+            if self.pattern.match(line) != None:
+                vector = Vector(line)
+                self.vectorDetected = vector.vectorDetected
+                self.lastVector = vector
+        except:
+            pass
     
     def startServer(self):
         thread = Thread(target = self.runServer)

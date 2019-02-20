@@ -2,24 +2,16 @@
 
 Pixy2 pixy;
 
-bool a = true;
-
-void setup()
-{
+void setup() {
+    // start serial comms
     Serial.begin(9600);
+    // set up pixycam
     pixy.init();
     pixy.changeProg("line");
+    pixy.setLamp(1, 0);
 }
 
-void loop()
-{
-    int8_t i;
-    char buf[128];
+void loop() {
     pixy.line.getMainFeatures();
-
     pixy.line.vectors[0].print();
-    Serial.println("");
-
-    pixy.setLamp(a?1:0, a?1:1);
-    a = a;
 }

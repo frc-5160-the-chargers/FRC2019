@@ -7,6 +7,8 @@ right_back_drive = 4
 right_top_drive = 2
 right_bottom_drive = 3
 
+# cargo device
+cargo_motor = 8
 
 #solenoids
 # there are now two actuators being used to move the extension

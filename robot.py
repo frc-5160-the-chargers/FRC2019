@@ -10,7 +10,7 @@ import robotmap
 import OI
 from OI import Side
 
-# from arduino.data_server import ArduinoServer
+from arduino.data_server import ArduinoServer
 from motorConfigurator import MotorConfigurator
 
 from components.drivetrain import Drivetrain
@@ -20,6 +20,7 @@ from components.gearbox_shifter import GearboxShifter
 from components.ultrasonic_sensor_array import UltrasonicSensorArray
 from components.analog_ultrasonic_sensor import AnalogUltrasonicSensor
 from components.navx_handler import NavXHandler
+from components.cargo_mechanism import CargoMechanism
 
 class MyRobot(magicbot.MagicRobot):
 
@@ -30,6 +31,7 @@ class MyRobot(magicbot.MagicRobot):
     hatch_grabber : HatchGrab
     hatch_extension : HatchExtend
     navx_handler : NavXHandler
+    cargo_mechanism : CargoMechanism
 
     def createObjects(self):
         """
@@ -43,6 +45,9 @@ class MyRobot(magicbot.MagicRobot):
         self.left_back_motor = ctre.WPI_TalonSRX(robotmap.left_bottom_drive)
         self.left_front_motor = ctre.WPI_TalonSRX(robotmap.left_front_drive)
         self.left_top_motor = ctre.WPI_TalonSRX(robotmap.left_top_drive)
+
+        # cargo mechanism motors
+        self.cargo_mechanism_motor = ctre.WPI_TalonSRX(robotmap.cargo_motor)
 
         # pneumatic components
         # drawer extenders
@@ -72,6 +77,10 @@ class MyRobot(magicbot.MagicRobot):
         # self.ultrasonic_sensor_left = AnalogUltrasonicSensor(robotmap.left_ultrasonic_sensor)
         # self.ultrasonic_sensor_right = AnalogUltrasonicSensor(robotmap.right_ultrasonic_sensor)
 
+        # limit switches
+        self.inner_cargo_limit_switch = wpilib.DigitalInput(robotmap.cargo_limit_switch_inside)
+        self.outer_cargo_limit_switch = wpilib.DigitalInput(robotmap.cargo_limit_switch_outside)
+
         # navx board
         self.navx = navx.AHRS.create_spi()
 
@@ -79,11 +88,15 @@ class MyRobot(magicbot.MagicRobot):
         self.oi = OI.OI()
 
         # code to run the pixy cam server
-        # self.pixy_cam_server = ArduinoServer()
-        # self.pixy_cam_server.startServer()          # launch a new thread for it
+        self.pixy_cam_server = ArduinoServer()
+        self.pixy_cam_server.startServer()          # launch a new thread for it
 
         # launch automatic camera capturing for main drive cam
         wpilib.CameraServer.launch()
+
+        # PID tuning params
+        wpilib.SmartDashboard.putNumberArray("DriveForwardsPID", [0.2, 0, 0])
+        wpilib.SmartDashboard.putNumberArray("TurnPID", [1, 0, 0])        
 
 
     def teleopInit(self):
@@ -94,6 +107,9 @@ class MyRobot(magicbot.MagicRobot):
         self.oi.load_user_settings()
         self.navx_handler.reset_rotation()
         self.drivetrain.reset_encoders()
+
+        # self.drivetrain.pid.set_setpoint_reset(self.drivetrain.TICKS_PER_INCH*12)
+        # self.drivetrain.turn_to_position(90, timeout=5)
 
 
     def teleopPeriodic(self):
@@ -126,9 +142,11 @@ class MyRobot(magicbot.MagicRobot):
             if wpilib.XboxController(0).getXButtonPressed():
                 self.oi.twoStickMode = not self.oi.twoStickMode
 
+            # self.drivetrain.drive_set_distance()
+
             print("Left position: {}\t Right positon: {}".format(self.drivetrain.get_left_position(), self.drivetrain.get_right_position()))
-            # print("Line detected: {}".format(str(self.pixy_cam_server.getVector())))
-        
+            print("Line detected: {}".format(str(self.pixy_cam_server.getVector())))
+            print("PID Line Following: {}".format(str(wpilib.SmartDashboard.getNumberArray("DriveForwardsPID", [0, 0, 0]))))
         except:
             self.onException()
 
