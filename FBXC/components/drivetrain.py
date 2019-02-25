@@ -4,7 +4,7 @@ import wpilib
 import wpilib.drive
 from wpilib import DoubleSolenoid
 from enum import Enum, unique, auto
-from utils import PIDController
+from utils import PIDController, PIDToleranceController
 
 import time
 import math
