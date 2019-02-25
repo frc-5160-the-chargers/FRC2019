@@ -97,16 +97,27 @@ class PIDToleranceController:
         self.gain = gain
         self.min = mi
         self.max = ma
+        self.started = False
 
-    def start(self, setpoint):
+    def start(self, setpoint, tolerance, timeout, timeStable):
         """
         start the controller and asign a setpoint
             :param self: 
             :param setpoint:
+            :param tolerance: tolerance to use
+            :param timeout: timeout for this controller
+            :param timeStable: time to remain stable
         """
+        self.tolerance = tolerance
+        self.timeout = timeout
+        self.timeStable = timeStable
         self.pidController.set_setpoint_reset(setpoint)
         self.startTime = time.time()
         self.lastTimeNotInTolerance = self.startTime
+        self.started = True
+
+    def kill(self):
+        self.started = False
 
     def isDone(self):
         """
@@ -117,6 +128,8 @@ class PIDToleranceController:
             return True
         if time.time()-self.lastTimeNotInTolerance > self.timeStable:
             return True
+        if not self.started:
+            return False
         return False
 
     def getOutput(self, i):
@@ -125,6 +138,8 @@ class PIDToleranceController:
             :param self: 
             :param i: input to be compared with setpoint
         """
+        if self.isDone():
+            return 0
         if abs(self.pidController.previous_error) > self.tolerance:
             self.lastTimeNotInTolerance = time.time()
         return MathFunctions.clamp(self.pidController.pid(i)*self.gain, self.min, self.max)

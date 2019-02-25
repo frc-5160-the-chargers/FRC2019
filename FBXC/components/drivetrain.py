@@ -11,6 +11,12 @@ import math
 
 import OI
 
+class DriveModes:
+    TANKDRIVE = 0
+    ARCADEDRIVE = 1
+    PIDDISTANCE = 2
+    PIDTURNING = 3
+
 class Drivetrain:
     right_front_motor:  ctre.WPI_TalonSRX
     right_back_motor:   ctre.WPI_TalonSRX
@@ -34,11 +40,15 @@ class Drivetrain:
         self.right_motor_speed = 0
         self.square_inputs = False
 
+        self.currentMode = DriveModes.ARCADEDRIVE
+
         self.drivePid = PIDController(kP=0.0002)
         self.drivePid.reset()
+        self.drivePIDToleranceController = PIDToleranceController(self.drivePid, mi=-.5, ma=.5)
         
         self.turnPid = PIDController(kP=1)
         self.turnPid.reset()
+        self.turnPIDToleranceController = PIDToleranceController(self.turnPid, mi=-.25, ma=.25)
 
     def teleop_drive_robot(self, twoStick, left_motor_val=0, right_motor_val=0, square_inputs=False):
         self.left_motor_speed = left_motor_val
@@ -79,64 +89,47 @@ class Drivetrain:
         self.right_motor_speed = 0
         self.set_motor_powers()
 
-    def drive_to_position(self, distance, tolerance=1, timeout=5, timeStable=0.5):
-        """
-        very similar parameters to turn_to_position TODO write this doc out later
-        """
-        self.drivePid.set_setpoint_reset(distance)
+    def start_drive_to_position(self, distance, tolerance=1, timeout=5, timeStable=0.5):
+        self.drivePIDToleranceController.start(distance, tolerance, timeout, timeStable)
+        self.currentMode = DriveModes.PIDDISTANCE
+        self.reset_encoders()
+
+    def drive_to_position(self):
         kLeft = 1
         kRight = 1
-        error = tolerance+1
-        startTime = time.time()
-        lastTimeNotInTolerance = startTime
-        self.reset_encoders()
-        while time.time() < timeout+startTime:
-            pidOutput = self.drivePid.pid(self.get_average_position())
-            self.left_motor_speed = pidOutput*kLeft
-            self.right_motor_speed = pidOutput*kRight
-            self.set_motor_powers()
-            if abs(error) > tolerance:                              # not in tolerance
-                lastTimeNotInTolerance = time.time()
-            if time.time()-lastTimeNotInTolerance > timeStable:     # has been in tolerance long enough
-                self.stop_motors()
-                return True
-        self.stop_motors()
-        return False
+        if not self.drivePIDToleranceController.isDone():
+            pidOutput = self.drivePIDToleranceController.getOutput(self.get_average_position())
+            self.drive.tankDrive(pidOutput*kLeft, pidOutput*kRight)
+        else:
+            self.drive.tankDrive(0, 0)
 
-    def turn_to_position(self, degrees, tolerance=1, timeout=3, timeStable=0.5):
-        """
-        turn to a given position (degrees) using PID
-            :param self: 
-            :param degrees: the position to turn to
-            :param tolerance=1: the tolerance (in degrees)
-            :param timeout=3: the timeout (in seconds) or length to run until its done
-            :param timeStable=0.5: the number of seconds to keep the error within the tolerance before ending
-            :returns: True if done because error is within tolerance otherwise False
-        """
-        # TODO: Tune these values and integrate with PID class
-        self.turnPid.set_setpoint_reset(degrees)
-        # constants to apply to each motor side
-        kLeft = -0.5
-        kRight = -0.5
-        error = tolerance+1
-        startTime = time.time()
-        lastTimeNotInTolerance = time.time()
+    def start_turn_to_position(self, degrees, tolerance=1, timeout=3, timeStable=0.5):
+        self.turnPIDToleranceController.start(degrees, tolerance, timeout, timeStable)
+        self.currentMode = DriveModes.PIDTURNING
         self.gyro.reset()
-        while time.time() < startTime+timeout:
-            pidOutput = self.turnPid.pid(self.gyro.getAngle())
-            self.left_motor_speed = pidOutput*kLeft
-            self.right_motor_speed = pidOutput*kRight
-            self.set_motor_powers()
-            if abs(error) > tolerance:
-                lastTimeNotInTolerance = time.time()
-            if time.time()-lastTimeNotInTolerance > timeStable:
-                self.stop_motors()
-                return True
-        self.stop_motors()
-        return False
+
+    def turn_to_position(self):
+        # constants to apply to each motor side
+        kLeft = -1
+        kRight = -1
+        if not self.turnPIDToleranceController.isDone():
+            pidOutput = self.turnPIDToleranceController.getOutput(self.gyro.getAngle())
+            self.drive.tankDrive(pidOutput*kLeft, pidOutput*kRight)
+        else:
+            self.drive.tankDrive(0, 0)
+
+    def driver_takeover(self):
+        if self.oi.twoStickMode:
+            self.currentMode = DriveModes.TANKDRIVE
+        else:
+            self.currentMode = DriveModes.ARCADEDRIVE
 
     def execute(self):
-        if self.oi.twoStickMode:
+        if self.currentMode == DriveModes.TANKDRIVE:
             self.drive.tankDrive(self.left_motor_speed, self.right_motor_speed, self.square_inputs)
-        else:
+        if self.currentMode == DriveModes.ARCADEDRIVE:
             self.drive.arcadeDrive(self.left_motor_speed, self.right_motor_speed, self.square_inputs)
+        if self.currentMode == DriveModes.PIDDISTANCE:
+            self.drive_to_position()
+        if self.currentMode == DriveModes.PIDTURNING:
+            self.turn_to_position()

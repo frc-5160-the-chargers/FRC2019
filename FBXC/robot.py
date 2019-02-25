@@ -63,7 +63,6 @@ class MyRobot(magicbot.MagicRobot):
         # wpilib.CameraServer.launch()
 
         # PID tuning params on smartdashboard
-        # TODO actually read these off the dashboard, and get it set up...
         wpilib.SmartDashboard.putNumberArray("DriveForwardsPID", [0.2, 0, 0])
         wpilib.SmartDashboard.putNumberArray("TurnPID", [1, 0, 0])        
 
@@ -102,17 +101,20 @@ class MyRobot(magicbot.MagicRobot):
             # b: turn 90 degrees
             # x: read distance pid values
             # y: read turn pid values
-            if wpilib.XboxController(2).getAButtonPressed():
-                self.drivetrain.drive_to_position(12*3) # drive 3 feet or something
+            if wpilib.XboxController(2).getAButtonPressed:
+                self.drivetrain.start_drive_to_position(12*3) # drive 3 feet or something
             
             if wpilib.XboxController(2).getBButtonPressed():
-                self.drivetrain.turn_to_position(90, tolerance=5) # turn 90 degrees
+                self.drivetrain.start_turn_to_position(90) # turn 90 degrees
             
             if wpilib.XboxController(2).getXButtonPressed():
                 self.drivetrain.drivePid.kP, self.drivetrain.drivePid.kI, self.drivetrain.drivePid.kD = wpilib.SmartDashboard.getNumberArray("DriveForwardsPID", [0, 0, 0])
             
             if wpilib.XboxController(2).getYButtonPressed():
                 self.drivetrain.turnPid.kP, self.drivetrain.turnPid.kI, self.drivetrain.turnPid.kD = wpilib.SmartDashboard.getNumberArray("TurnPID", [0,0,0])
+
+            if wpilib.XboxController(2).getBumperPressed(wpilib.XboxController.Hand.kRight):
+                self.drivetrain.driver_takeover()
 
         except:
             self.onException()
