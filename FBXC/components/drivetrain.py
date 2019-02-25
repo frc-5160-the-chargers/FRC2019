@@ -40,7 +40,7 @@ class Drivetrain:
         self.right_motor_speed = 0
         self.square_inputs = False
 
-        self.currentMode = DriveModes.ARCADEDRIVE
+        self.currentMode = DriveModes.TANKDRIVE
 
         self.drivePid = PIDController(kP=0.0002)
         self.drivePid.reset()

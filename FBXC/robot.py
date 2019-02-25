@@ -95,13 +95,14 @@ class MyRobot(magicbot.MagicRobot):
                 self.oi.beastMode = not self.oi.beastMode
             if wpilib.XboxController(0).getXButtonPressed():
                 self.oi.twoStickMode = not self.oi.twoStickMode
+                self.drivetrain.driver_takeover()
 
             # PID Testing is on the third controller
             # a: drive 3 feet
             # b: turn 90 degrees
             # x: read distance pid values
             # y: read turn pid values
-            if wpilib.XboxController(2).getAButtonPressed:
+            if wpilib.XboxController(2).getAButtonPressed():
                 self.drivetrain.start_drive_to_position(12*3) # drive 3 feet or something
             
             if wpilib.XboxController(2).getBButtonPressed():
