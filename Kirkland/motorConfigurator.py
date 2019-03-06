@@ -7,7 +7,7 @@ class MotorConfigurator:
         Configure a given motor controller for drivetrain usage
             :param motor:ctre.WPI_TalonSRX: The motor to be configured
         """
-        motor.configFactoryDefault()
+        # motor.configFactoryDefault()
         # 0 is disabled for ramp rates, input is in seconds
         motor.configOpenLoopRamp(0.5)
         motor.clearStickyFaults()

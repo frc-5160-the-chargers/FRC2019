@@ -30,7 +30,7 @@ class MyRobot(magicbot.MagicRobot):
     drivetrain : Drivetrain
     hatch_grabber : HatchGrab
     hatch_extension : HatchExtend
-    navx_handler : NavXHandler
+    gyro : NavXHandler
     cargo_mechanism : CargoMechanism
 
     def createObjects(self):
@@ -73,10 +73,6 @@ class MyRobot(magicbot.MagicRobot):
         # create drivetrain based on groupings
         self.drive = wpilib.drive.DifferentialDrive(self.left_drive_motors, self.right_drive_motors)
 
-        # ultrasonic sensors (which yet again dont exist :( )
-        # self.ultrasonic_sensor_left = AnalogUltrasonicSensor(robotmap.left_ultrasonic_sensor)
-        # self.ultrasonic_sensor_right = AnalogUltrasonicSensor(robotmap.right_ultrasonic_sensor)
-
         # limit switches
         self.inner_cargo_limit_switch = wpilib.DigitalInput(robotmap.cargo_limit_switch_inside)
         self.outer_cargo_limit_switch = wpilib.DigitalInput(robotmap.cargo_limit_switch_outside)
@@ -88,16 +84,20 @@ class MyRobot(magicbot.MagicRobot):
         self.oi = OI.OI()
 
         # code to run the pixy cam server
-        self.pixy_cam_server = ArduinoServer()
-        self.pixy_cam_server.startServer()          # launch a new thread for it
+        # self.pixy_cam_server = ArduinoServer()
+        # self.pixy_cam_server.startServer()          # launch a new thread for it
 
         # launch automatic camera capturing for main drive cam
         wpilib.CameraServer.launch()
 
         # PID tuning params
-        wpilib.SmartDashboard.putNumberArray("DriveForwardsPID", [0.2, 0, 0])
-        wpilib.SmartDashboard.putNumberArray("TurnPID", [1, 0, 0])        
+        self.driveLabels = ["dKP", "dKI", "dKD"]
+        self.turnLabels = ["tKP", "tKI", "tKD"]
 
+        for i in self.driveLabels:
+            wpilib.SmartDashboard.putNumber(i, 0.1)
+        for i in self.turnLabels:
+            wpilib.SmartDashboard.putNumber(i, 0.1)
 
     def teleopInit(self):
         """
@@ -105,7 +105,7 @@ class MyRobot(magicbot.MagicRobot):
         """
         #self.oi.write_settings()
         self.oi.load_user_settings()
-        self.navx_handler.reset_rotation()
+        self.gyro.reset_rotation()
         self.drivetrain.reset_encoders()
 
         # self.drivetrain.pid.set_setpoint_reset(self.drivetrain.TICKS_PER_INCH*12)
@@ -142,11 +142,25 @@ class MyRobot(magicbot.MagicRobot):
             if wpilib.XboxController(0).getXButtonPressed():
                 self.oi.twoStickMode = not self.oi.twoStickMode
 
-            # self.drivetrain.drive_set_distance()
-
-            print("Left position: {}\t Right positon: {}".format(self.drivetrain.get_left_position(), self.drivetrain.get_right_position()))
-            print("Line detected: {}".format(str(self.pixy_cam_server.getVector())))
-            print("PID Line Following: {}".format(str(wpilib.SmartDashboard.getNumberArray("DriveForwardsPID", [0, 0, 0]))))
+            # yeah so we need a button to load in the PID constants
+            if wpilib.XboxController(2).getAButtonPressed():
+                self.drivetrain.drivePIDToleranceController.updateConstants(
+                    kP=wpilib.SmartDashboard.getNumber(self.driveLabels[0], 0),
+                    kI=wpilib.SmartDashboard.getNumber(self.driveLabels[1], 0),
+                    kD=wpilib.SmartDashboard.getNumber(self.driveLabels[2], 0)
+                )
+                self.drivetrain.turnPIDToleranceController.updateConstants(
+                    kP=wpilib.SmartDashboard.getNumber(self.turnLabels[0], 0),
+                    kI=wpilib.SmartDashboard.getNumber(self.turnLabels[1], 0),
+                    kD=wpilib.SmartDashboard.getNumber(self.turnLabels[2], 0)
+                )
+            if wpilib.XboxController(2).getBButtonPressed():
+                self.drivetrain.driver_takeover()
+            # and obviously with that comes a need for a way to switch between different test modes
+            if wpilib.XboxController(2).getXButtonPressed():
+                self.drivetrain.start_turn_to_position(90, timeout=200, tolerance=0.1, timeStable=100)
+            if wpilib.XboxController(2).getYButtonPressed():
+                self.drivetrain.start_drive_to_position(12*3, timeout=200, tolerance=0.1, timeStable=100)
         except:
             self.onException()
 

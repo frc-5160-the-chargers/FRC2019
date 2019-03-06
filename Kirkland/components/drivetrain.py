@@ -5,13 +5,21 @@ import wpilib.drive
 from wpilib import DoubleSolenoid
 from enum import Enum, unique, auto
 from components.gearbox_shifter import GearboxShifter
-from utils import PIDController
+from utils import PIDController, PIDToleranceController
 from components import navx_handler
+
+import robotmap
 
 import time
 import math
 
 import OI
+
+class DriveModes:
+    TANKDRIVE = 0
+    ARCADEDRIVE = 1
+    PIDDISTANCE = 2
+    PIDTURNING = 3
 
 class Drivetrain:
     right_front_motor:  ctre.WPI_TalonSRX
@@ -31,15 +39,13 @@ class Drivetrain:
     left_shifter : GearboxShifter
     right_shifter : GearboxShifter
 
-    navx_handler : navx_handler.NavXHandler
+    gyro : navx_handler.NavXHandler
 
     # configurable constants
     SHIFTDELAY = .5     # seconds between moving the shifter and restoring driver control
     SHIFTPOWER = .2    # power to use when shifting
     SHIFTTIMEOUT = 1    # time between shifting allowed
     REQUIRED_SHIFT_SPEED = 100
-
-    TICKS_PER_INCH = 224.6
 
     def __init__(self):
         self.left_motor_speed = 0
@@ -49,8 +55,15 @@ class Drivetrain:
         self.last_shift_time = 0
         self.shifting = False
 
-        self.pid = PIDController(kP=0.0002)
-        self.pid.reset()
+        self.currentMode = DriveModes.TANKDRIVE
+
+        self.drivePID = PIDController()
+        self.drivePID.reset()
+        self.drivePIDToleranceController = PIDToleranceController(self.drivePID, mi=-.75, ma=.75)
+
+        self.turnPID = PIDController()
+        self.turnPID.reset()
+        self.turnPIDToleranceController = PIDToleranceController(self.turnPID, mi=-.5, ma=.5)
 
     def teleop_drive_robot(self, twoStick, left_motor_val=0, right_motor_val=0, square_inputs=False):
         if not self.shifting:
@@ -83,7 +96,6 @@ class Drivetrain:
         self.reset_left_encoder()
         self.reset_right_encoder()
 
-
     def print_velocities(self):
         print("right side v: " + str(self.get_right_velocity()) + "left side v: " + str(self.get_left_velocity))
 
@@ -100,11 +112,6 @@ class Drivetrain:
         # move solenoids
             self.left_shifter.toggle_shift()
             self.right_shifter.toggle_shift()
-    
-    def drive_set_distance(self):
-        #distance measured in encoder ticks
-        pid_val = self.pid.pid(self.get_average_position())
-        self.drive.tankDrive(pid_val, pid_val)
 
     def set_motor_powers(self):
         """
@@ -123,59 +130,47 @@ class Drivetrain:
         self.right_motor_speed = 0
         self.set_motor_powers()
 
-    def turn_to_position(self, degrees, tolerance=1, timeout=3, timeStable=0.5):
-        """
-        turn to a given position (degrees) using PID
-            :param self: 
-            :param degrees: the position to turn to
-            :param tolerance=1: the tolerance (in degrees)
-            :param timeout=3: the timeout (in seconds) or length to run until its done
-            :param timeStable=0.5: the number of seconds to keep the error within the tolerance before ending
-            :returns: True if done because error is within tolerance otherwise False
-        """
-        # TODO: Tune these values and integrate with PID class
-        pid = PIDController(kP=0.05)
-        pid.set_setpoint_reset(degrees)
+    def start_drive_to_position(self, distance, tolerance=1, timeout=5, timeStable=0.5):
+        self.drivePIDToleranceController.start(distance, tolerance, timeout, timeStable)
+        self.currentMode = DriveModes.PIDDISTANCE
+        self.reset_encoders()
 
+    def drive_to_position(self):
+        kLeft = -1
+        kRight = -1
+        if not self.drivePIDToleranceController.isDone():
+            pidOutput = self.drivePIDToleranceController.getOutput(self.get_average_position())
+            self.drive.tankDrive(pidOutput*kLeft, pidOutput*kRight)
+        else:
+            self.drive.tankDrive(0, 0)
+
+    def start_turn_to_position(self, degrees, tolerance=1, timeout=3, timeStable=0.5):
+        self.turnPIDToleranceController.start(degrees, tolerance, timeout, timeStable)
+        self.currentMode = DriveModes.PIDTURNING
+        self.gyro.reset_rotation()
+
+    def turn_to_position(self):
         # constants to apply to each motor side
-        kLeft = -0.5
-        kRight = -0.5
-        
-        error = tolerance+1
-        startTime = time.time()
-        lastTimeNotInTolerance = time.time()
-        
-        self.navx_handler.reset_rotation()
+        kLeft = 1
+        kRight = -1
+        if not self.turnPIDToleranceController.isDone():
+            pidOutput = self.turnPIDToleranceController.getOutput(self.gyro.get_rotation())
+            self.drive.tankDrive(pidOutput*kLeft, pidOutput*kRight)
+        else:
+            self.drive.tankDrive(0, 0)
 
-        while time.time() < startTime+timeout:
-            pidOutput = pid.pid(self.navx_handler.get_rotation())
-
-            print(pid.previous_error)
-            
-            self.left_motor_speed = pidOutput*kLeft
-            self.right_motor_speed = pidOutput*kRight
-            
-            self.set_motor_powers()
-            
-            if abs(error) > tolerance:
-                lastTimeNotInTolerance = time.time()
-            
-            if time.time()-lastTimeNotInTolerance > timeStable:
-                self.stop_motors()
-                return True
-        
-        self.stop_motors()
-        return False
+    def driver_takeover(self):
+        if self.oi.twoStickMode:
+            self.currentMode = DriveModes.TANKDRIVE
+        else:
+            self.currentMode = DriveModes.ARCADEDRIVE
 
     def execute(self):
-        if self.oi.twoStickMode:
+        if self.currentMode == DriveModes.TANKDRIVE:
             self.drive.tankDrive(self.left_motor_speed, self.right_motor_speed, self.square_inputs)
-        else:
+        if self.currentMode == DriveModes.ARCADEDRIVE:
             self.drive.arcadeDrive(self.left_motor_speed, self.right_motor_speed, self.square_inputs)
-        
-        if self.oi.drivetrain_shifting_control():
-            self.shift()
-
-        # I don't think this has to exist but it might so I commented it out
-        self.left_shifter.execute()
-        self.right_shifter.execute()
+        if self.currentMode == DriveModes.PIDDISTANCE:
+            self.drive_to_position()
+        if self.currentMode == DriveModes.PIDTURNING:
+            self.turn_to_position()

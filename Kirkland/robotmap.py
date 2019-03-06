@@ -1,3 +1,5 @@
+import math
+
 # drivetrain
 # note that front is the motor towards the front, back is back, and top is the one physically above the others
 left_front_drive = 5
@@ -31,11 +33,12 @@ hatch_grab_back = 0
 
 
 # sensors
-# these are the ultrasonic sensors
-# TODO welp these don't actually exist anymore.
-# left_ultrasonic_sensor = 0
-# right_ultrasonic_sensor = 1
-
 # limit switches for cargo mechanism
 cargo_limit_switch_outside = 0
 cargo_limit_switch_inside = 1
+
+
+# these are just some constants that define robot movement
+wheel_diameter = 6
+encoder_ticks_per_rotation = 1024 # 1024 in 1x decoding, 4096 in 4x
+encoder_wheel_geartrain_ratio = 1 # i wish it was one... find this from a mechanical :b:oi
