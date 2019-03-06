@@ -4,8 +4,6 @@ import magicbot
 import wpilib
 import wpilib.drive
 
-import navx
-
 import ctre
 
 import robotmap
@@ -42,18 +40,17 @@ class MyRobot(magicbot.MagicRobot):
         self.right_drive_motors = wpilib.SpeedControllerGroup(self.right_front_motor, self.right_back_motor)
 
         # encoders
-        self.left_encoder = wpilib.Encoder(aChannel=robotmap.left_encoder_a, bChannel=robotmap.left_encoder_b)
+        self.left_encoder = wpilib.Encoder(aChannel=robotmap.left_encoder_a, bChannel=robotmap.left_encoder_b, reverseDirection=False, encodingType=wpilib.Encoder.EncodingType.k4X)
         self.left_encoder.setPIDSourceType(wpilib.Encoder.PIDSourceType.kDisplacement)
-        self.left_encoder.setDistancePerPulse((robotmap.wheel_diameter*math.pi)/(256))
-        self.right_encoder = wpilib.Encoder(aChannel=robotmap.right_encoder_a, bChannel=robotmap.right_encoder_b)
+        self.right_encoder = wpilib.Encoder(aChannel=robotmap.right_encoder_a, bChannel=robotmap.right_encoder_b, reverseDirection=False, encodingType=wpilib.Encoder.EncodingType.k4X)
         self.right_encoder.setPIDSourceType(wpilib.Encoder.PIDSourceType.kDisplacement)
-        self.left_encoder.setDistancePerPulse((robotmap.wheel_diameter*math.pi)/(256))
 
         # create drivetrain based on groupings
         self.drive = wpilib.drive.DifferentialDrive(self.left_drive_motors, self.right_drive_motors)
 
         # ahrs gyro
         self.gyro = wpilib.ADXRS450_Gyro(0)
+        self.gyro.calibrate()
 
         # oi class
         self.oi = OI.OI()
@@ -64,7 +61,7 @@ class MyRobot(magicbot.MagicRobot):
 
         # PID tuning params on smartdashboard
         wpilib.SmartDashboard.putNumberArray("DriveForwardsPID", [0.2, 0, 0])
-        wpilib.SmartDashboard.putNumberArray("TurnPID", [1, 0, 0])        
+        wpilib.SmartDashboard.putNumberArray("TurnPID", [1, 0, 0])
 
 
     def teleopInit(self):
@@ -103,19 +100,21 @@ class MyRobot(magicbot.MagicRobot):
             # x: read distance pid values
             # y: read turn pid values
             if wpilib.XboxController(2).getAButtonPressed():
-                self.drivetrain.start_drive_to_position(12*3) # drive 3 feet or something
+                self.drivetrain.start_drive_to_position(12*3, timeout=20, tolerance=0.1, timeStable=3) # drive 3 feet or something
             
             if wpilib.XboxController(2).getBButtonPressed():
                 self.drivetrain.start_turn_to_position(90) # turn 90 degrees
             
             if wpilib.XboxController(2).getXButtonPressed():
                 self.drivetrain.drivePid.kP, self.drivetrain.drivePid.kI, self.drivetrain.drivePid.kD = wpilib.SmartDashboard.getNumberArray("DriveForwardsPID", [0, 0, 0])
-            
+
             if wpilib.XboxController(2).getYButtonPressed():
                 self.drivetrain.turnPid.kP, self.drivetrain.turnPid.kI, self.drivetrain.turnPid.kD = wpilib.SmartDashboard.getNumberArray("TurnPID", [0,0,0])
 
             if wpilib.XboxController(2).getBumperPressed(wpilib.XboxController.Hand.kRight):
                 self.drivetrain.driver_takeover()
+
+            print(self.gyro.getAngle())
 
         except:
             self.onException()

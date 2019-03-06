@@ -1,3 +1,5 @@
+import math
+
 # drivetrain
 left_front_drive = 1
 left_back_drive = 2
@@ -12,3 +14,5 @@ right_encoder_b = 3
 
 # wheel diameter
 wheel_diameter = 6
+
+inches_per_tick = (6*math.pi)/256

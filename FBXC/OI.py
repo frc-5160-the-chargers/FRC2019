@@ -56,7 +56,7 @@ class OI:
             if robot_side == Side.LEFT:
                 return self.process_input(self.driver_joystick.getRawAxis(1))
             elif robot_side == Side.RIGHT:
-                return -self.driver_joystick.getRawAxis(4)/2
+                return -self.driver_joystick.getRawAxis(4)*0.7
     
     def drive_one_foot(self):
         return self.getButtonPressed(self.driver_joystick, self.settings["drive_foot"])

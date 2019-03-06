@@ -5,7 +5,7 @@ import wpilib.drive
 from wpilib import DoubleSolenoid
 from enum import Enum, unique, auto
 from utils import PIDController, PIDToleranceController
-
+import robotmap
 import time
 import math
 
@@ -42,13 +42,13 @@ class Drivetrain:
 
         self.currentMode = DriveModes.TANKDRIVE
 
-        self.drivePid = PIDController(kP=0.0002)
+        self.drivePid = PIDController(kP=0.75*0.9, kI=0.75*0.54/10, kD=0.3)
         self.drivePid.reset()
-        self.drivePIDToleranceController = PIDToleranceController(self.drivePid, mi=-.5, ma=.5)
+        self.drivePIDToleranceController = PIDToleranceController(self.drivePid, mi=-0.75, ma=0.75)
         
         self.turnPid = PIDController(kP=1)
         self.turnPid.reset()
-        self.turnPIDToleranceController = PIDToleranceController(self.turnPid, mi=-.25, ma=.25)
+        self.turnPIDToleranceController = PIDToleranceController(self.turnPid, mi=-.5, ma=.5)
 
     def teleop_drive_robot(self, twoStick, left_motor_val=0, right_motor_val=0, square_inputs=False):
         self.left_motor_speed = left_motor_val
@@ -59,9 +59,9 @@ class Drivetrain:
     def get_right_position(self):
         return self.right_encoder.getDistance()
     def get_left_position(self):
-        return self.left_encoder.getDistance()
+        return -self.left_encoder.getDistance()
     def get_average_position(self):
-        return (self.get_right_position() + self.get_left_position()) / 2.0
+        return ((self.get_right_position() + self.get_left_position()) / -2) * robotmap.inches_per_tick
     
     #reset either or both drive encoders
     def reset_left_encoder(self):
@@ -95,8 +95,8 @@ class Drivetrain:
         self.reset_encoders()
 
     def drive_to_position(self):
-        kLeft = 1
-        kRight = 1
+        kLeft = -1
+        kRight = -1
         if not self.drivePIDToleranceController.isDone():
             pidOutput = self.drivePIDToleranceController.getOutput(self.get_average_position())
             self.drive.tankDrive(pidOutput*kLeft, pidOutput*kRight)
@@ -110,7 +110,7 @@ class Drivetrain:
 
     def turn_to_position(self):
         # constants to apply to each motor side
-        kLeft = -1
+        kLeft = 1
         kRight = -1
         if not self.turnPIDToleranceController.isDone():
             pidOutput = self.turnPIDToleranceController.getOutput(self.gyro.getAngle())

@@ -61,6 +61,8 @@ class PIDController:
         # calculate time in ms since last called
         current_time = time.time()
         dT = current_time - self.last_time
+        if dT == 0:
+            dT = 0.000000001
 
         # error = target - actual
         error = self.setpoint - self.measurement
