@@ -150,3 +150,103 @@ class PIDToleranceController:
         if abs(self.pidController.previous_error) > self.tolerance:
             self.lastTimeNotInTolerance = time.time()
         return MathFunctions.clamp(self.pidController.pid(i)*self.gain, self.min, self.max)
+
+class State:
+    def __init__(self):
+        pass
+
+class TimedState(State):
+    def __init__(self, duration, method):
+        # so the python magic here is passing in a function as the method variable
+        self.timer = Timer()
+        self.duration = duration
+        self.method = method
+
+    def start(self):
+        self.timer.start()
+        self.method()
+
+    def abort(self):
+        self.endTime = 0
+
+    def isRunning(self):
+        if self.timer.update() > self.duration:
+            return False
+        return True
+
+    def execute(self):
+        if self.isRunning():
+            self.method()
+
+class TimedStateRunner:
+    def __init__(self, states):
+        self.states = states
+        self.currentState = 0
+        self.running = False
+
+    def start(self):
+        self.running = True
+        self.states[0].start()
+    
+    def abort(self):
+        self.running = False
+    
+    def reset(self):
+        self.currentState = 0
+        self.running = False
+
+    def execute(self):
+        if self.running:
+            if self.currentState >= len(self.states):
+                self.abort()
+            elif self.states[self.currentState].isRunning():
+                self.states[self.currentState].execute()
+            else:
+                self.currentState += 1
+                if self.currentState < len(self.states):
+                    self.states[self.currentState].start()
+
+class TimedStateRunnerChooser:
+    def __init__(self, runnerTrue, runnerFalse, choiceMethod):
+        self.runnerTrue = runnerTrue
+        self.runnerFalse = runnerFalse
+        self.choose = choiceMethod
+        self.choice = -1
+
+    def start(self):
+        if self.choose() == False:
+            self.runnerFalse.start()
+            self.choice = 0
+        else:
+            self.runnerTrue.start()
+            self.choice = 1
+
+    def abort(self):
+        if self.choice == 0:
+            self.runnerFalse.abort()
+        if self.choice == 1:
+            self.runnerTrue.abort()
+        
+    def reset(self):
+        if self.choice == 0:
+            self.runnerFalse.reset()
+        if self.choice == 1:
+            self.runnerTrue.reset()
+
+    def execute(self):
+        if self.choice == -1:
+            self.start()
+        if self.choice == 0:
+            self.runnerFalse.execute()
+        if self.choice == 1:
+            self.runnerTrue.execute()
+
+class Timer:
+    def __init__(self):
+        self.startTime = 0
+    
+    def start(self):
+        self.startTime = time.time()
+
+    def update(self):
+        return time.time()-self.startTime
