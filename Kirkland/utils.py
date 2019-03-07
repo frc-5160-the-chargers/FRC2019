@@ -185,8 +185,10 @@ class TimedStateRunner:
         self.running = False
 
     def start(self):
+        self.reset()
         self.running = True
         self.states[0].start()
+        self.currentState = 0
     
     def abort(self):
         self.running = False
@@ -205,48 +207,31 @@ class TimedStateRunner:
                 self.currentState += 1
                 if self.currentState < len(self.states):
                     self.states[self.currentState].start()
-
-class TimedStateRunnerChooser:
-    def __init__(self, runnerTrue, runnerFalse, choiceMethod):
-        self.runnerTrue = runnerTrue
-        self.runnerFalse = runnerFalse
-        self.choose = choiceMethod
-        self.choice = -1
-
-    def start(self):
-        if self.choose() == False:
-            self.runnerFalse.start()
-            self.choice = 0
-        else:
-            self.runnerTrue.start()
-            self.choice = 1
-
-    def abort(self):
-        if self.choice == 0:
-            self.runnerFalse.abort()
-        if self.choice == 1:
-            self.runnerTrue.abort()
-        
-    def reset(self):
-        if self.choice == 0:
-            self.runnerFalse.reset()
-        if self.choice == 1:
-            self.runnerTrue.reset()
-
-    def execute(self):
-        if self.choice == -1:
-            self.start()
-        if self.choice == 0:
-            self.runnerFalse.execute()
-        if self.choice == 1:
-            self.runnerTrue.execute()
+                self.states[self.currentState-1].timer.reset()
 
 class Timer:
     def __init__(self):
         self.startTime = 0
+        self.recordedTime = 0
+        self.running = False
     
+    def reset(self):
+        self.startTime = 0
+        self.recordedTime = 0
+        self.running = False
+
     def start(self):
+        self.reset()
         self.startTime = time.time()
+        self.running = True
+        self.recordedTime = 0
+
+    def stop(self):
+        self.recordedTime = self.update()
+        self.running = False
 
     def update(self):
-        return time.time()-self.startTime
+        if self.running:
+            return time.time()-self.startTime
+        else:
+            return self.recordedTime

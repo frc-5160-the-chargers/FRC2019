@@ -135,6 +135,16 @@ class MyRobot(magicbot.MagicRobot):
             if wpilib.XboxController(0).getXButtonPressed():
                 self.drivetrain.toggle_tankdrive()
 
+            # handle automagic hatch stuff
+            if wpilib.XboxController(1).getXButtonPressed():
+                self.hatch_subsystem.retrieval_pressed()
+            if wpilib.XboxController(1).getXButtonReleased():
+                self.hatch_subsystem.start_release()
+            if wpilib.XboxController(1).getAButtonPressed():
+                self.hatch_subsystem.placing_pressed()
+            if wpilib.XboxController(1).getAButtonReleased():
+                self.hatch_subsystem.start_release()
+
             # yeah so we need a button to load in the PID constants
             if wpilib.XboxController(2).getAButtonPressed():
                 self.drivetrain.drivePIDToleranceController.updateConstants(
