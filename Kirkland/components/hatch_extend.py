@@ -1,11 +1,10 @@
 from wpilib import DoubleSolenoid
 
 class HatchExtend:
-    hatch_extension_actuator_left : DoubleSolenoid
-    hatch_extension_actuator_right : DoubleSolenoid
-
-    def __init__(self):
+    def __init__(self, hatch_extension_actuator_left, hatch_extension_actuator_right):
         self.extended = False
+        self.hatch_extension_actuator_left = hatch_extension_actuator_left
+        self.hatch_extension_actuator_right = hatch_extension_actuator_right
 
     def extend_hatch(self):
         self.extended = True

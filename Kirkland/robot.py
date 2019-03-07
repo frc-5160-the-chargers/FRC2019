@@ -21,15 +21,12 @@ from components.ultrasonic_sensor_array import UltrasonicSensorArray
 from components.analog_ultrasonic_sensor import AnalogUltrasonicSensor
 from components.navx_handler import NavXHandler
 from components.cargo_mechanism import CargoMechanism
+from components.hatch_manager import HatchManager
 
 class MyRobot(magicbot.MagicRobot):
-
-    # High level components - list these first
-
-    # Low level components
+    # components
     drivetrain : Drivetrain
-    hatch_grabber : HatchGrab
-    hatch_extension : HatchExtend
+    hatch_subsystem : HatchManager
     gyro : NavXHandler
     cargo_mechanism : CargoMechanism
 
@@ -52,9 +49,11 @@ class MyRobot(magicbot.MagicRobot):
         # pneumatic components
         # drawer extenders
         self.hatch_extension_actuator_left = wpilib.DoubleSolenoid(robotmap.hatch_extension_pcm, robotmap.hatch_extension_left_front, robotmap.hatch_extension_left_back)
-        self.hatch_extension_actuator_right = wpilib.DoubleSolenoid(robotmap.hatch_extension_pcm, robotmap.hatch_extension_right_front, robotmap.hatch_extension_right_back)
+        self.hatch_extension_actuator_right = wpilib.DoubleSolenoid(robotmap.hatch_extension_pcm, robotmap.hatch_extension_right_front, robotmap.hatch_extension_right_back)    
+        self.hatch_extension = HatchExtend(self.hatch_extension_actuator_left, self.hatch_extension_actuator_right)
         # grabber
         self.hatch_grab_actuator = wpilib.DoubleSolenoid(robotmap.grabber_pcm, robotmap.hatch_grab_front, robotmap.hatch_grab_back)
+        self.hatch_grabber = HatchGrab(self.hatch_grab_actuator)
         # shifters
         self.left_shifter_actuator = wpilib.DoubleSolenoid(robotmap.shifter_pcm, robotmap.shifter_left_front, robotmap.shifter_left_back)
         self.right_shifter_actuator = wpilib.DoubleSolenoid(robotmap.shifter_pcm, robotmap.shifter_right_front, robotmap.shifter_right_back)

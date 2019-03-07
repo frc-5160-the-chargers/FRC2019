@@ -1,10 +1,9 @@
 from wpilib import DoubleSolenoid
 
 class HatchGrab:
-    hatch_grab_actuator : DoubleSolenoid
-
-    def __init__(self):
+    def __init__(self, hatch_grab_actuator):
         self.latched = False
+        self.hatch_grab_actuator = hatch_grab_actuator
 
     def grab_hatch(self):
         self.latched = True
