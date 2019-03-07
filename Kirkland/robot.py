@@ -164,6 +164,9 @@ class MyRobot(magicbot.MagicRobot):
                 self.drivetrain.start_turn_to_position(90, timeout=200, tolerance=0.1, timeStable=100)
             if wpilib.XboxController(2).getYButtonPressed():
                 self.drivetrain.start_drive_to_position(12*3, timeout=200, tolerance=0.1, timeStable=100)
+
+            # PID Constant dashboard debugging
+            print("kP: {}, kI: {}, kD: {}".format(wpilib.SmartDashboard.getNumber(self.driveLabels[0], 0),wpilib.SmartDashboard.getNumber(self.driveLabels[1], 0),wpilib.SmartDashboard.getNumber(self.driveLabels[2], 0)))
         except:
             self.onException()
 

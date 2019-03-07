@@ -102,6 +102,14 @@ class Drivetrain:
     def ready_to_shift(self):
         return abs(self.left_front_motor.getQuadratureVelocity()) > self.REQUIRED_SHIFT_SPEED
 
+    def downshift(self):
+        self.left_shifter.shift_down()
+        self.right_shifter.shift_down()
+
+    def upshift(self):
+        self.left_shifter.shift_up()
+        self.right_shifter.shift_up()
+
     def shift(self):
         """
         shift from current gear to other gear
@@ -131,6 +139,7 @@ class Drivetrain:
         self.set_motor_powers()
 
     def start_drive_to_position(self, distance, tolerance=1, timeout=5, timeStable=0.5):
+        self.downshift()
         self.drivePIDToleranceController.start(distance, tolerance, timeout, timeStable)
         self.currentMode = DriveModes.PIDDISTANCE
         self.reset_encoders()
@@ -145,6 +154,7 @@ class Drivetrain:
             self.drive.tankDrive(0, 0)
 
     def start_turn_to_position(self, degrees, tolerance=1, timeout=3, timeStable=0.5):
+        self.downshift()
         self.turnPIDToleranceController.start(degrees, tolerance, timeout, timeStable)
         self.currentMode = DriveModes.PIDTURNING
         self.gyro.reset_rotation()
