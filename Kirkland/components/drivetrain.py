@@ -165,6 +165,10 @@ class Drivetrain:
         else:
             self.currentMode = DriveModes.ARCADEDRIVE
 
+    def toggle_tankdrive(self):
+        if self.currentMode in [DriveModes.TANKDRIVE, DriveModes.ARCADEDRIVE]:
+            self.currentMode = DriveModes.TANKDRIVE if self.currentMode == DriveModes.ARCADEDRIVE else DriveModes.ARCADEDRIVE
+
     def execute(self):
         if self.currentMode == DriveModes.TANKDRIVE:
             self.drive.tankDrive(self.left_motor_speed, self.right_motor_speed, self.square_inputs)

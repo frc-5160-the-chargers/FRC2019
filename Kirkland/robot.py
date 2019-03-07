@@ -116,12 +116,6 @@ class MyRobot(magicbot.MagicRobot):
         Called on each iteration of the control loop
         """
         try:
-            # handle the drivetrain
-            if self.oi.twoStickMode:
-                self.drivetrain.teleop_drive_robot(self.oi.twoStickMode, self.oi.process_driver_input(Side.LEFT), self.oi.process_driver_input(Side.RIGHT), square_inputs=True)
-            else:
-                self.drivetrain.teleop_drive_robot(self.oi.twoStickMode, self.oi.process_driver_input(Side.LEFT), self.oi.process_driver_input(Side.RIGHT), square_inputs=True)
-
             # operate the hatch mechanism
             # the drawer
             if self.oi.hatch_extend_control():
@@ -139,7 +133,7 @@ class MyRobot(magicbot.MagicRobot):
             if wpilib.XboxController(0).getAButtonPressed():
                 self.oi.beastMode = not self.oi.beastMode
             if wpilib.XboxController(0).getXButtonPressed():
-                self.oi.twoStickMode = not self.oi.twoStickMode
+                self.drivetrain.toggle_tankdrive()
 
             # yeah so we need a button to load in the PID constants
             if wpilib.XboxController(2).getAButtonPressed():

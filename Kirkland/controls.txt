@@ -1,0 +1,24 @@
+yeah so here's the control layout for all you skrubs who didnt read the code
+
+CONTROLLER 1 (main driver)
+    left stick      forwards & backwards/tank drive left side
+    right stick     turning/tank drive right side
+    x               shift from arcade to tank mode and vice versa
+    y               also shift if you are a heretic
+    a               ｂｅａｓｔ　ｍｏｄｅ
+    b               
+    right bumper    shift
+
+
+CONTROLLER 2 (sysop)
+    x               automagically retrieve a hatch with aborting
+    y               manually toggle rack with grabber
+    a               automagically place a hatch with aborting
+    b               manually toggle grab with the hatch grabber
+
+
+CONTROLLER 3 (programmer override stuff)
+    x               turn 90 degrees
+    y               drive 3 feet
+    a               update pid constants
+    b               driver takeover stuff

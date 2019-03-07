@@ -29,8 +29,8 @@ class OI:
         settings = {
             "hatch_grab" : wpilib.XboxController.Button.kB,
             "hatch_extend" : wpilib.XboxController.Button.kY,
-            "drivetrain_shift" : wpilib.XboxController.Button.kX,
-            "drive_foot" : wpilib.XboxController.Button.kA
+            "drivetrain_shift" : wpilib.XboxController.Button.kY,
+            "drive_foot" : wpilib.XboxController.Button.kB
         }
 
         with open(OI.SETTINGSFILE, 'w') as outfile:
