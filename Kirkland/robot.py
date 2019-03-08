@@ -88,8 +88,8 @@ class MyRobot(magicbot.MagicRobot):
         self.oi = OI.OI()
 
         # code to run the pixy cam server
-        # self.pixy_cam_server = ArduinoServer()
-        # self.pixy_cam_server.startServer()          # launch a new thread for it
+        self.pixy_cam_server = ArduinoServer()
+        self.pixy_cam_server.startServer()          # launch a new thread for it
 
         #NOTE: we don't need this anymore because of camera switching from vision.py but I'm leaving it anyways
         # launch automatic camera capturing for main drive cam
@@ -109,9 +109,7 @@ class MyRobot(magicbot.MagicRobot):
         for i in self.turnLabels:
             wpilib.SmartDashboard.putNumber(i, 0.1)
 
-    
-
-    def robotInit(self):
+    def teleopInit(self):
         """
         Called when the robot starts; optional
         """
@@ -127,7 +125,7 @@ class MyRobot(magicbot.MagicRobot):
         # self.drivetrain.turn_to_position(90, timeout=5)
 
 
-    def robotPeriodic(self):
+    def teleopPeriodic(self):
         """
         Called on each iteration of the control loop for both auton and tele
         """
@@ -202,6 +200,9 @@ class MyRobot(magicbot.MagicRobot):
             #display normalized supply voltage
             wpilib.SmartDashboard.putNumber("Normalized Sensor Vcc", self.pressure_sensor.normalized_voltage)
 
+            # display the angle measued by the pixycam
+            vector = self.pixy_cam_server.getVector()
+            wpilib.SmartDashboard.putNumber("pixycam angle", 0 if vector == None else vector.getAngle())
         except:
             self.onException()
 

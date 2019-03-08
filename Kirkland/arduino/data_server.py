@@ -2,6 +2,7 @@ import time
 import serial
 import re
 from threading import Thread
+import math
 
 class Vector:
     def __init__(self, inStr):
@@ -23,6 +24,21 @@ class Vector:
             return "({}), infinite slope".format(", ".join(list(map(str, self.compound))))
         else:
             return "No vector detected"
+
+    def getAngle(self):
+        # first get the quadrant
+        a = self.compound[0]
+        b = -self.compound[1]
+        angle = 0
+        if a > 0 and b > 0:
+            angle = math.atan(b/a)
+        if a < 0 and b > 0:
+            angle = 180+math.atan(b/a)
+        if a < 0 and b < 0:
+            angle = 180+math.atan(b/a)
+        if a > 0 and b < 0:
+            angle = 360+math.atan(b/a)
+        return angle
 
     def getYFromX(self, x):
         return self.slope*x+self.yIntercept
