@@ -98,3 +98,6 @@ class OI:
     def calibrate_pressure_sensor(self):
         return (self.sysop_joystick.getRawButtonPressed(self.settings["pressure_cal_1"])
             and self.sysop_joystick.getRawButtonPressed(self.settings["pressure_cal_2"]))
+    
+    def switch_cameras(self):
+        return self.driver_joystick.getRawButtonPressed(self.settings["camera_switch"])

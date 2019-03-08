@@ -6,15 +6,19 @@ CONTROLLER 1 (main driver)
     x               shift from arcade to tank mode and vice versa
     y               also shift if you are a heretic
     a               ｂｅａｓｔ　ｍｏｄｅ
-    b               
+    b               switch cameras
     right bumper    shift
-
+  
 
 CONTROLLER 2 (sysop)
     x               automagically retrieve a hatch with aborting
     y               manually toggle rack with grabber
     a               automagically place a hatch with aborting
     b               manually toggle grab with the hatch grabber
+    
+    left stick
+    and right       calibrate the pressure sensor
+    stick
 
 
 CONTROLLER 3 (programmer override stuff)

@@ -4,5 +4,6 @@
     "drivetrain_shift": 6,
     "drive_foot": 4,
     "pressure_cal_1": 9,
-    "pressure_cal_2": 10
+    "pressure_cal_2": 10,
+    "switch_cameras": 2
 }

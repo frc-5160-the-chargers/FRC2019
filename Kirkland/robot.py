@@ -10,6 +10,8 @@ import robotmap
 import OI
 from OI import Side
 
+from networktables import NetworkTables
+
 from arduino.data_server import ArduinoServer
 from motorConfigurator import MotorConfigurator
 
@@ -89,8 +91,14 @@ class MyRobot(magicbot.MagicRobot):
         # self.pixy_cam_server = ArduinoServer()
         # self.pixy_cam_server.startServer()          # launch a new thread for it
 
+        #NOTE: we don't need this anymore because of camera switching from vision.py but I'm leaving it anyways
         # launch automatic camera capturing for main drive cam
-        wpilib.CameraServer.launch()
+        #wpilib.CameraServer.launch()
+
+        #networktables server
+        NetworkTables.initialize(server='roborio-5160-frc.local')
+        self.nt = NetworkTables.getTable("/CameraPublisher")
+        self.current_camera = 0
 
         # PID tuning params
         self.driveLabels = ["dKP", "dKI", "dKD"]
@@ -172,6 +180,10 @@ class MyRobot(magicbot.MagicRobot):
                 self.drivetrain.start_turn_to_position(90, timeout=200, tolerance=0.1, timeStable=100)
             if wpilib.XboxController(2).getYButtonPressed():
                 self.drivetrain.start_drive_to_position(12*3, timeout=200, tolerance=0.1, timeStable=100)
+
+            if self.oi.switch_cameras():
+                self.current_camera = 0 if not self.current_current_camera == 0 else 1
+                sd.putNumber("selected", self.current_camera)
 
             # PID Constant dashboard debugging
             print("kP: {}, kI: {}, kD: {}".format(wpilib.SmartDashboard.getNumber(self.driveLabels[0], 0),wpilib.SmartDashboard.getNumber(self.driveLabels[1], 0),wpilib.SmartDashboard.getNumber(self.driveLabels[2], 0)))
