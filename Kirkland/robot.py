@@ -93,7 +93,7 @@ class MyRobot(magicbot.MagicRobot):
 
         #NOTE: we don't need this anymore because of camera switching from vision.py but I'm leaving it anyways
         # launch automatic camera capturing for main drive cam
-        #wpilib.CameraServer.launch()
+        wpilib.CameraServer.launch("vision.py:main")
 
         #networktables server
         NetworkTables.initialize(server='roborio-5160-frc.local')
@@ -119,7 +119,7 @@ class MyRobot(magicbot.MagicRobot):
         self.drivetrain.reset_encoders()
 
         #start vision.py
-        wpilib.CameraServer.launch("vision.py:main")
+        # wpilib.CameraServer.launch("vision.py:main")
 
         # self.drivetrain.pid.set_setpoint_reset(self.drivetrain.TICKS_PER_INCH*12)
         # self.drivetrain.turn_to_position(90, timeout=5)
@@ -130,6 +130,11 @@ class MyRobot(magicbot.MagicRobot):
         Called on each iteration of the control loop for both auton and tele
         """
         try:
+            if self.oi.twoStickMode:
+                self.drivetrain.teleop_drive_robot(self.oi.twoStickMode, self.oi.process_driver_input(Side.LEFT), self.oi.process_driver_input(Side.RIGHT), square_inputs=True)
+            else:
+                self.drivetrain.teleop_drive_robot(self.oi.twoStickMode, self.oi.process_driver_input(Side.LEFT), self.oi.process_driver_input(Side.RIGHT), square_inputs=True)
+
 
             #calibrate the analog pressure sensor
             if self.oi.calibrate_pressure_sensor():
@@ -184,21 +189,21 @@ class MyRobot(magicbot.MagicRobot):
             if wpilib.XboxController(2).getYButtonPressed():
                 self.drivetrain.start_drive_to_position(12*3, timeout=200, tolerance=0.1, timeStable=100)
 
-            if self.oi.switch_cameras():
-                self.current_camera = 0 if not self.current_current_camera == 0 else 1
-                sd.putNumber("selected", self.current_camera)
+            # if self.oi.switch_cameras():
+            #    self.current_camera = 0 if not self.current_camera == 0 else 1
+            #    wpilib.SmartDashboard.putNumber("selected", self.current_camera)
 
             # PID Constant dashboard debugging
             print("kP: {}, kI: {}, kD: {}".format(wpilib.SmartDashboard.getNumber(self.driveLabels[0], 0),wpilib.SmartDashboard.getNumber(self.driveLabels[1], 0),wpilib.SmartDashboard.getNumber(self.driveLabels[2], 0)))
         
             #display calibrated air pressure in smart dashboard
-            wpilib.SmartDashboard.putNumber("Calibrated Pressure", self.pressure_sensor.get_pressure_psi())
+            # wpilib.SmartDashboard.putNumber("Calibrated Pressure", self.pressure_sensor.get_pressure_psi())
             #display uncalibrated air pressure
             wpilib.SmartDashboard.putNumber("Uncalibrated Pressure", self.pressure_sensor.get_uncalibrated_pressure_psi())
             #display raw sensor voltage
-            wpilib.SmartDashboard.putNumber("Raw Pressure Sensor Voltage", self.pressure_sensor.get_raw_output())
+            # wpilib.SmartDashboard.putNumber("Raw Pressure Sensor Voltage", self.pressure_sensor.get_raw_output())
             #display normalized supply voltage
-            wpilib.SmartDashboard.putNumber("Normalized Sensor Vcc", self.pressure_sensor.normalized_voltage)
+            # wpilib.SmartDashboard.putNumber("Normalized Sensor Vcc", self.pressure_sensor.normalized_voltage)
 
             # display the angle measued by the pixycam
             vector = self.pixy_cam_server.getVector()

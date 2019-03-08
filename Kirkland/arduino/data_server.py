@@ -29,22 +29,14 @@ class Vector:
         # first get the quadrant
         a = self.compound[0]
         b = -self.compound[1]
-        angle = 0
-        if a > 0 and b > 0:
-            angle = math.atan(b/a)
-        if a < 0 and b > 0:
-            angle = 180+math.atan(b/a)
-        if a < 0 and b < 0:
-            angle = 180+math.atan(b/a)
-        if a > 0 and b < 0:
-            angle = 360+math.atan(b/a)
-        return angle
+        angle = math.atan2(b, a)
+        return math.degrees(angle)
 
     def getYFromX(self, x):
         return self.slope*x+self.yIntercept
 
 class ArduinoServer:
-    def __init__(self, comPort="/dev/ttyACM0"):
+    def __init__(self, comPort="/dev/serial/by-id/usb-Arduino__www.arduino.cc__0043_8533234343235160F190-if00"):
         self.serialConnnection = serial.Serial(
             port=comPort,
             baudrate=9600,

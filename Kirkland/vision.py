@@ -8,7 +8,10 @@ import networktables
 def main():
     cs = CameraServer.getInstance()
     cs.enableLogging()
-
+    usb1 = cs.startAutomaticCapture(dev=0)
+    usb2 = cs.startAutomaticCapture(dev=1)
+    cs.waitForever()
+"""
     usb0 = UsbCamera("Camera 0", 0)
     usb1 = UsbCamera("Camera 1", 1)
 
@@ -41,3 +44,4 @@ if __name__ == "__main__":
     networktables.NetworkTables.initialize(server="roborio-5160-frc.local")
 
     main()
+"""
