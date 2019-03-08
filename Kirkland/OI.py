@@ -94,3 +94,7 @@ class OI:
             return i
         else:
             return 0
+    
+    def calibrate_pressure_sensor(self):
+        return (self.sysop_joystick.getRawButtonPressed(self.settings["pressure_cal_1"])
+            and self.sysop_joystick.getRawButtonPressed(self.settings["pressure_cal_2"]))

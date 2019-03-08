@@ -22,6 +22,7 @@ from components.analog_ultrasonic_sensor import AnalogUltrasonicSensor
 from components.navx_handler import NavXHandler
 from components.cargo_mechanism import CargoMechanism
 from components.hatch_manager import HatchManager
+from components.analog_pressure_sensor import AnalogPressureSensor
 
 class MyRobot(magicbot.MagicRobot):
     # components
@@ -57,6 +58,8 @@ class MyRobot(magicbot.MagicRobot):
         # shifters
         self.left_shifter_actuator = wpilib.DoubleSolenoid(robotmap.shifter_pcm, robotmap.shifter_left_front, robotmap.shifter_left_back)
         self.right_shifter_actuator = wpilib.DoubleSolenoid(robotmap.shifter_pcm, robotmap.shifter_right_front, robotmap.shifter_right_back)
+        #pressure sensor
+        self.pressure_sensor = AnalogPressureSensor(1)
         
         # gearbox shifters
         self.left_shifter = GearboxShifter(self.left_shifter_actuator)
@@ -116,6 +119,11 @@ class MyRobot(magicbot.MagicRobot):
         Called on each iteration of the control loop
         """
         try:
+
+            #calibrate the analog pressure sensor
+            if self.oi.calibrate_pressure_sensor():
+                self.pressure_sensor.calibrate_pressure()
+
             # operate the hatch mechanism
             # the drawer
             if self.oi.hatch_extend_control():
