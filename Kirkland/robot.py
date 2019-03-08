@@ -109,22 +109,27 @@ class MyRobot(magicbot.MagicRobot):
         for i in self.turnLabels:
             wpilib.SmartDashboard.putNumber(i, 0.1)
 
-    def teleopInit(self):
+    
+
+    def robotInit(self):
         """
-        Called when teleop starts; optional
+        Called when the robot starts; optional
         """
         #self.oi.write_settings()
         self.oi.load_user_settings()
         self.gyro.reset_rotation()
         self.drivetrain.reset_encoders()
 
+        #start vision.py
+        wpilib.CameraServer.launch("vision.py:main")
+
         # self.drivetrain.pid.set_setpoint_reset(self.drivetrain.TICKS_PER_INCH*12)
         # self.drivetrain.turn_to_position(90, timeout=5)
 
 
-    def teleopPeriodic(self):
+    def robotPeriodic(self):
         """
-        Called on each iteration of the control loop
+        Called on each iteration of the control loop for both auton and tele
         """
         try:
 
