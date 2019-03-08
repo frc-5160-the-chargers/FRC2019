@@ -175,6 +175,16 @@ class MyRobot(magicbot.MagicRobot):
 
             # PID Constant dashboard debugging
             print("kP: {}, kI: {}, kD: {}".format(wpilib.SmartDashboard.getNumber(self.driveLabels[0], 0),wpilib.SmartDashboard.getNumber(self.driveLabels[1], 0),wpilib.SmartDashboard.getNumber(self.driveLabels[2], 0)))
+        
+            #display calibrated air pressure in smart dashboard
+            wpilib.SmartDashboard.putNumber("Calibrated Pressure", self.pressure_sensor.get_pressure_psi())
+            #display uncalibrated air pressure
+            wpilib.SmartDashboard.putNumber("Uncalibrated Pressure", self.pressure_sensor.get_uncalibrated_pressure_psi())
+            #display raw sensor voltage
+            wpilib.SmartDashboard.putNumber("Raw Pressure Sensor Voltage", self.pressure_sensor.get_raw_output())
+            #display normalized supply voltage
+            wpilib.SmartDashboard.putNumber("Normalized Sensor Vcc", self.pressure_sensor.normalized_voltage)
+
         except:
             self.onException()
 
