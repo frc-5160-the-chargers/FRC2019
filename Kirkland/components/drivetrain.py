@@ -116,10 +116,10 @@ class Drivetrain:
             :param self: 
         """
         # first make sure that gearboxes are moving
-        if self.ready_to_shift():
+        # if self.ready_to_shift():
         # move solenoids
-            self.left_shifter.toggle_shift()
-            self.right_shifter.toggle_shift()
+        self.left_shifter.toggle_shift()
+        self.right_shifter.toggle_shift()
 
     def set_motor_powers(self):
         """

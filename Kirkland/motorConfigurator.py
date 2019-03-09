@@ -2,6 +2,17 @@ import ctre
 
 class MotorConfigurator:
     @staticmethod
+    def configure_cargo_redline(motor: ctre.WPI_TalonSRX):
+        """
+        Configure a given motor controller for drivetrain usage
+            :param motor:ctre.WPI_TalonSRX: The motor to be configured
+        """
+        # motor.configFactoryDefault()
+        # 0 is disabled for ramp rates, input is in seconds
+        motor.clearStickyFaults()
+        motor.setNeutralMode(ctre.NeutralMode.Brake)
+
+    @staticmethod
     def configure_drivetrain_cim(motor: ctre.WPI_TalonSRX):
         """
         Configure a given motor controller for drivetrain usage

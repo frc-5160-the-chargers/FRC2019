@@ -20,31 +20,31 @@ class HatchManager:
         self.abortTimer = Timer()
 
         self.retrieval_released_aborted = TimedStateRunner([
-            TimedState(0.2, self.retract),
+            TimedState(0.5, self.retract),
             TimedState(0.0, self.grab),
             TimedState(0.0, self.set_idle)
         ])
 
         self.retrieval_released_normal = TimedStateRunner([
-            TimedState(0.2, self.grab),
-            TimedState(0.2, self.retract),
+            TimedState(0.5, self.grab),
+            TimedState(0.5, self.retract),
             TimedState(0.0, self.set_idle)
         ])
 
         self.retrieval_pressed_states = TimedStateRunner([
-            TimedState(0.2, self.release),
-            TimedState(0.2, self.extend),
+            TimedState(0.5, self.release),
+            TimedState(0.5, self.extend),
             TimedState(0.0, self.abortTimer.start)
         ])
 
         self.placing_released_aborted = TimedStateRunner([
-            TimedState(0.2, self.retract),
+            TimedState(0.5, self.retract),
             TimedState(0.0, self.set_idle)
         ])
 
         self.placing_released_normal = TimedStateRunner([
-            TimedState(0.2, self.release),
-            TimedState(0.2, self.retract),
+            TimedState(0.5, self.release),
+            TimedState(0.5, self.retract),
             TimedState(0.0, self.grab),
             TimedState(0.0, self.set_idle)
         ])
@@ -92,7 +92,6 @@ class HatchManager:
         self.abortTimer.stop()
 
     def aborted(self):
-        print(self.abortTimer.update())
         return 1 if self.abortTimer.update() > 1.5 else 0
         
     def manuallyAbortAutomation(self):

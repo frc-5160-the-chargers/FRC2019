@@ -15,7 +15,7 @@ from networktables import NetworkTables
 # from arduino.data_server import ArduinoServer
 from motorConfigurator import MotorConfigurator
 
-from components.drivetrain import Drivetrain
+from components.drivetrain import Drivetrain, DriveModes
 from components.hatch_extend import HatchExtend
 from components.hatch_grab import HatchGrab
 from components.gearbox_shifter import GearboxShifter
@@ -48,6 +48,7 @@ class MyRobot(magicbot.MagicRobot):
 
         # cargo mechanism motors
         self.cargo_mechanism_motor = ctre.WPI_TalonSRX(robotmap.cargo_motor)
+        MotorConfigurator.configure_cargo_redline(self.cargo_mechanism_motor)
 
         # pneumatic components
         # drawer extenders
@@ -109,6 +110,9 @@ class MyRobot(magicbot.MagicRobot):
         for i in self.turnLabels:
             wpilib.SmartDashboard.putNumber(i, 0.1)
 
+    # def autonomousInit(self):
+    #    self.teleopInit()
+
     def teleopInit(self):
         """
         Called when the robot starts; optional
@@ -124,6 +128,8 @@ class MyRobot(magicbot.MagicRobot):
         # self.drivetrain.pid.set_setpoint_reset(self.drivetrain.TICKS_PER_INCH*12)
         # self.drivetrain.turn_to_position(90, timeout=5)
 
+    # def autonomousPeriodic(self):
+    #    self.teleopPeriodic(self)
 
     def teleopPeriodic(self):
         """
@@ -207,6 +213,15 @@ class MyRobot(magicbot.MagicRobot):
             # display the angle measued by the pixycam
             # vector = self.pixy_cam_server.getVector()
             # wpilib.SmartDashboard.putNumber("pixycam angle", 0 if vector == None else vector.getAngle())
+            # wpilib.SmartDashboard.putBoolean("aborted", False if self.hatch_subsystem.aborted() == 0 else True)
+            # wpilib.SmartDashboard.putBoolean("main sequence complete", self.hatch_subsystem.abortTimer.running)
+
+            # booleans to indicate grabber status
+            wpilib.SmartDashboard.putString("hatch grabber status", "Latched" if self.hatch_subsystem.hatch_grabber.latched else "Not Latched")
+            wpilib.SmartDashboard.putString("hatch rack status", "Extended" if self.hatch_subsystem.hatch_extension.extended else "Retracted")
+
+            wpilib.SmartDashboard.putString("Tank drive", "Enabled" if self.drivetrain.currentMode == DriveModes.TANKDRIVE else "Disabled")
+            wpilib.SmartDashboard.putString("Beast mode", "Enabled" if self.oi.beastMode else "Disabled")
         except:
             self.onException()
 
