@@ -32,7 +32,7 @@ class HatchManager:
         ])
 
         self.retrieval_pressed_states = TimedStateRunner([
-            TimedState(0.2, self.grab),
+            TimedState(0.2, self.release),
             TimedState(0.2, self.extend),
             TimedState(0.0, self.abortTimer.start)
         ])
@@ -74,8 +74,6 @@ class HatchManager:
 
     def run_release(self):
         self.currentMode.execute()
-        if not self.currentMode.running:
-            self.currentState = HatchStates.IDLE
 
     def set_idle(self):
         self.currentState = HatchStates.IDLE
@@ -96,9 +94,9 @@ class HatchManager:
     def aborted(self):
         print(self.abortTimer.update())
         return 1 if self.abortTimer.update() > 1.5 else 0
-
+        
     def manuallyAbortAutomation(self):
-        self.currentState = HatchStates.RETRACTING
+        self.currentState = HatchStates.IDLE
 
     def placing_pressed(self):
         self.placing_pressed_states.start()

@@ -39,6 +39,8 @@ cargo_limit_switch_inside = 1
 
 
 # these are just some constants that define robot movement
-wheel_diameter = 6
-encoder_ticks_per_rotation = 1024 # 1024 in 1x decoding, 4096 in 4x
-encoder_wheel_geartrain_ratio = 1 # i wish it was one... find this from a mechanical :b:oi
+wheel_circumference = 6*math.pi
+encoder_ticks_per_rotation = 4096 # talon srx defaults to 4096 ticks per rotation
+encoder_output_shaft_ratio = 7.5 # 7.5:1 encoder shaft:output shaft
+ticks_per_output_shaft_rotation = encoder_output_shaft_ratio*encoder_ticks_per_rotation
+ticks_per_inch = ticks_per_output_shaft_rotation/wheel_circumference

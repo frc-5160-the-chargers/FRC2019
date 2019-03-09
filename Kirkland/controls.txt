@@ -8,8 +8,8 @@ CONTROLLER 1 (main driver)
     a               ｂｅａｓｔ　ｍｏｄｅ
     b               switch cameras
     right bumper    shift
+    
   
-
 CONTROLLER 2 (sysop)
     x               automagically retrieve a hatch with aborting
     y               manually toggle rack with grabber

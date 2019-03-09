@@ -12,7 +12,7 @@ from OI import Side
 
 from networktables import NetworkTables
 
-from arduino.data_server import ArduinoServer
+# from arduino.data_server import ArduinoServer
 from motorConfigurator import MotorConfigurator
 
 from components.drivetrain import Drivetrain
@@ -88,8 +88,8 @@ class MyRobot(magicbot.MagicRobot):
         self.oi = OI.OI()
 
         # code to run the pixy cam server
-        self.pixy_cam_server = ArduinoServer()
-        self.pixy_cam_server.startServer()          # launch a new thread for it
+        # self.pixy_cam_server = ArduinoServer()
+        # self.pixy_cam_server.startServer()          # launch a new thread for it
 
         #NOTE: we don't need this anymore because of camera switching from vision.py but I'm leaving it anyways
         # launch automatic camera capturing for main drive cam
@@ -134,7 +134,6 @@ class MyRobot(magicbot.MagicRobot):
                 self.drivetrain.teleop_drive_robot(self.oi.twoStickMode, self.oi.process_driver_input(Side.LEFT), self.oi.process_driver_input(Side.RIGHT), square_inputs=True)
             else:
                 self.drivetrain.teleop_drive_robot(self.oi.twoStickMode, self.oi.process_driver_input(Side.LEFT), self.oi.process_driver_input(Side.RIGHT), square_inputs=True)
-
 
             #calibrate the analog pressure sensor
             if self.oi.calibrate_pressure_sensor():
@@ -194,7 +193,7 @@ class MyRobot(magicbot.MagicRobot):
             #    wpilib.SmartDashboard.putNumber("selected", self.current_camera)
 
             # PID Constant dashboard debugging
-            print("kP: {}, kI: {}, kD: {}".format(wpilib.SmartDashboard.getNumber(self.driveLabels[0], 0),wpilib.SmartDashboard.getNumber(self.driveLabels[1], 0),wpilib.SmartDashboard.getNumber(self.driveLabels[2], 0)))
+            # print("kP: {}, kI: {}, kD: {}".format(wpilib.SmartDashboard.getNumber(self.driveLabels[0], 0),wpilib.SmartDashboard.getNumber(self.driveLabels[1], 0),wpilib.SmartDashboard.getNumber(self.driveLabels[2], 0)))
         
             #display calibrated air pressure in smart dashboard
             # wpilib.SmartDashboard.putNumber("Calibrated Pressure", self.pressure_sensor.get_pressure_psi())
@@ -206,8 +205,8 @@ class MyRobot(magicbot.MagicRobot):
             # wpilib.SmartDashboard.putNumber("Normalized Sensor Vcc", self.pressure_sensor.normalized_voltage)
 
             # display the angle measued by the pixycam
-            vector = self.pixy_cam_server.getVector()
-            wpilib.SmartDashboard.putNumber("pixycam angle", 0 if vector == None else vector.getAngle())
+            # vector = self.pixy_cam_server.getVector()
+            # wpilib.SmartDashboard.putNumber("pixycam angle", 0 if vector == None else vector.getAngle())
         except:
             self.onException()
 

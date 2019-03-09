@@ -180,12 +180,14 @@ class Drivetrain:
             self.currentMode = DriveModes.TANKDRIVE if self.currentMode == DriveModes.ARCADEDRIVE else DriveModes.ARCADEDRIVE
 
     def execute(self):
-        self.drive.tankDrive(self.left_motor_speed, self.right_motor_speed, self.square_inputs)
         if self.currentMode == DriveModes.TANKDRIVE:
-            pass
+            self.drive.tankDrive(self.left_motor_speed, self.right_motor_speed, self.square_inputs)
         if self.currentMode == DriveModes.ARCADEDRIVE:
             self.drive.arcadeDrive(self.left_motor_speed, self.right_motor_speed, self.square_inputs)
         if self.currentMode == DriveModes.PIDDISTANCE:
             self.drive_to_position()
         if self.currentMode == DriveModes.PIDTURNING:
             self.turn_to_position()
+
+        self.left_shifter.execute()
+        self.right_shifter.execute()
