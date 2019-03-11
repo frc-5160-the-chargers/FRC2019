@@ -204,11 +204,11 @@ class MyRobot(magicbot.MagicRobot):
             #display calibrated air pressure in smart dashboard
             # wpilib.SmartDashboard.putNumber("Calibrated Pressure", self.pressure_sensor.get_pressure_psi())
             #display uncalibrated air pressure
-            wpilib.SmartDashboard.putNumber("Uncalibrated Pressure", self.pressure_sensor.get_uncalibrated_pressure_psi())
+            wpilib.SmartDashboard.putNumber("Uncalibrated Pressure", self.pressure_sensor.get_pressure_psi())
             #display raw sensor voltage
             # wpilib.SmartDashboard.putNumber("Raw Pressure Sensor Voltage", self.pressure_sensor.get_raw_output())
             #display normalized supply voltage
-            # wpilib.SmartDashboard.putNumber("Normalized Sensor Vcc", self.pressure_sensor.normalized_voltage)
+            wpilib.SmartDashboard.putNumber("Normalized Sensor Vcc", self.pressure_sensor.normalized_voltage)
 
             # display the angle measued by the pixycam
             # vector = self.pixy_cam_server.getVector()

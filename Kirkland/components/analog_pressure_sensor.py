@@ -8,6 +8,7 @@ class AnalogPressureSensor():
 
     def __init__(self, port):
         self.analog = AnalogInput(port)
+        self.normalized_voltage = 1.606
     
     def get_raw_output(self):
         return self.analog.getVoltage()

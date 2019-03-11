@@ -74,7 +74,7 @@ class OI:
             if robot_side == Side.LEFT:
                 return self.process_input(self.driver_joystick.getRawAxis(1))
             elif robot_side == Side.RIGHT:
-                return -self.driver_joystick.getRawAxis(4)/2
+                return -self.driver_joystick.getRawAxis(4)/1.7
     
     def drive_one_foot(self):
         return self.getButtonPressed(self.driver_joystick, self.settings["drive_foot"])
@@ -89,9 +89,12 @@ class OI:
         return self.sysop_joystick.getRawButtonPressed(self.settings["hatch_grab"])
 
     def process_cargo_control(self):
-        i = (self.sysop_joystick.getRawAxis(1)**3)/2
+        i = (self.sysop_joystick.getRawAxis(1)**3)
+        # j = (self.sysop_joystick.getRawAxis(5)**3)/2.33
         if abs(self.sysop_joystick.getRawAxis(1)) > 0.1:
             return i
+        # elif abs(self.sysop_joystick.getRawAxis(5)) > 0.1:
+        #    return j
         else:
             return 0
     

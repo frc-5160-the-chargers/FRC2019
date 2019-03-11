@@ -20,7 +20,8 @@ class MotorConfigurator:
         """
         # motor.configFactoryDefault()
         # 0 is disabled for ramp rates, input is in seconds
-        motor.configOpenLoopRamp(0.5)
+        # TODO: 30 amp over 5 seconds in the future
+        motor.configOpenLoopRamp(0.3)
         motor.clearStickyFaults()
         motor.enableCurrentLimit(True)
         motor.configContinuousCurrentLimit(70)
