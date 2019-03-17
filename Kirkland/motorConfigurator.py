@@ -2,14 +2,26 @@ import ctre
 
 class MotorConfigurator:
     @staticmethod
+    def configure_cargo_redline(motor: ctre.WPI_TalonSRX):
+        """
+        Configure a given motor controller for drivetrain usage
+            :param motor:ctre.WPI_TalonSRX: The motor to be configured
+        """
+        # motor.configFactoryDefault()
+        # 0 is disabled for ramp rates, input is in seconds
+        motor.clearStickyFaults()
+        motor.setNeutralMode(ctre.NeutralMode.Brake)
+
+    @staticmethod
     def configure_drivetrain_cim(motor: ctre.WPI_TalonSRX):
         """
         Configure a given motor controller for drivetrain usage
             :param motor:ctre.WPI_TalonSRX: The motor to be configured
         """
-        motor.configFactoryDefault()
+        # motor.configFactoryDefault()
         # 0 is disabled for ramp rates, input is in seconds
-        motor.configOpenLoopRamp(0.5)
+        # TODO: 30 amp over 5 seconds in the future
+        motor.configOpenLoopRamp(0.3)
         motor.clearStickyFaults()
         motor.enableCurrentLimit(True)
         motor.configContinuousCurrentLimit(70)

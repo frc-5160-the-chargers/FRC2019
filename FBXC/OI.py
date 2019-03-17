@@ -11,8 +11,6 @@ class Side(Enum):
     RIGHT = auto()
 
 class OI:
-    SETTINGSFILE = os.path.dirname(os.path.realpath(__file__)) + "/settings.json"
-
     DEADZONE = 0.1
 
     def __init__(self):
@@ -24,23 +22,7 @@ class OI:
         self.driver_joystick = wpilib.XboxController(0)
         self.sysop_joystick = wpilib.XboxController(1)
 
-    #This method is no longer used but is kept so that the json file can be regenerated if necessary.
-    def write_user_settings(self):
-        settings = {
-            "hatch_grab" : wpilib.XboxController.Button.kB,
-            "hatch_extend" : wpilib.XboxController.Button.kY,
-            "drivetrain_shift" : wpilib.XboxController.Button.kX,
-            "drive_foot" : wpilib.XboxController.Button.kA
-        }
-
-        with open(OI.SETTINGSFILE, 'w') as outfile:
-            json.dump(settings, outfile)
-
-    def load_user_settings(self):
-        with open(OI.SETTINGSFILE) as json_file:
-            settings_dict = json.load(json_file)
-            self.settings = settings_dict
-
+   
     def getButtonPressed(self, controller : wpilib.XboxController, button):
         """
         Get button pressed on a given controller, but do it so that the config file can be used
@@ -74,7 +56,7 @@ class OI:
             if robot_side == Side.LEFT:
                 return self.process_input(self.driver_joystick.getRawAxis(1))
             elif robot_side == Side.RIGHT:
-                return -self.driver_joystick.getRawAxis(4)/2
+                return -self.driver_joystick.getRawAxis(4)*0.7
     
     def drive_one_foot(self):
         return self.getButtonPressed(self.driver_joystick, self.settings["drive_foot"])

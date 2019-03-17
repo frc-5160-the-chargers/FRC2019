@@ -1,3 +1,5 @@
+import math
+
 # drivetrain
 # note that front is the motor towards the front, back is back, and top is the one physically above the others
 left_front_drive = 5
@@ -31,11 +33,14 @@ hatch_grab_back = 0
 
 
 # sensors
-# these are the ultrasonic sensors
-# TODO welp these don't actually exist anymore.
-# left_ultrasonic_sensor = 0
-# right_ultrasonic_sensor = 1
-
 # limit switches for cargo mechanism
 cargo_limit_switch_outside = 0
 cargo_limit_switch_inside = 1
+
+
+# these are just some constants that define robot movement
+wheel_circumference = 6*math.pi
+encoder_ticks_per_rotation = 4096 # talon srx defaults to 4096 ticks per rotation
+encoder_output_shaft_ratio = 7.5 # 7.5:1 encoder shaft:output shaft
+ticks_per_output_shaft_rotation = encoder_output_shaft_ratio*encoder_ticks_per_rotation
+ticks_per_inch = ticks_per_output_shaft_rotation/wheel_circumference

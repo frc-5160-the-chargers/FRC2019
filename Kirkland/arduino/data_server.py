@@ -2,6 +2,7 @@ import time
 import serial
 import re
 from threading import Thread
+import math
 
 class Vector:
     def __init__(self, inStr):
@@ -24,11 +25,18 @@ class Vector:
         else:
             return "No vector detected"
 
+    def getAngle(self):
+        # first get the quadrant
+        a = self.compound[0]
+        b = -self.compound[1]
+        angle = math.atan2(b, a)
+        return math.degrees(angle)
+
     def getYFromX(self, x):
         return self.slope*x+self.yIntercept
 
 class ArduinoServer:
-    def __init__(self, comPort="/dev/ttyACM0"):
+    def __init__(self, comPort="/dev/serial/by-id/usb-Arduino__www.arduino.cc__0043_8533234343235160F190-if00"):
         self.serialConnnection = serial.Serial(
             port=comPort,
             baudrate=9600,
