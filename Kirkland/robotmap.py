@@ -39,3 +39,15 @@ encoder_ticks_per_rotation = 4096 # talon srx defaults to 4096 ticks per rotatio
 encoder_output_shaft_ratio = 7.5 # 7.5:1 encoder shaft:output shaft
 ticks_per_output_shaft_rotation = encoder_output_shaft_ratio*encoder_ticks_per_rotation
 ticks_per_inch = ticks_per_output_shaft_rotation/wheel_circumference
+
+
+# PID constants
+# driving
+drive_kP = 0
+drive_kI = 0
+drive_kD = 0
+
+# turning
+turn_kP = 0
+turn_kI = 0
+turn_kD = 0

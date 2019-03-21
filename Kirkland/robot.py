@@ -9,6 +9,8 @@ from components.drivetrain import Drivetrain
 from components.pneumatic_assemblies import HatchGrab, HatchRack, Shifters
 from components.cargo_mechanism import CargoMechanism
 
+from controllers.drivetrain_pid import DriveStraightPID, TurnPID
+
 import robotmap
 from motor_configurator import configure_cargo_redline, bulk_config_drivetrain 
 from oi import OI, Side
@@ -21,6 +23,9 @@ class MyRobot(magicbot.MagicRobot):
     hatch_rack :        HatchRack
     hatch_grab :        HatchGrab
     gearbox_shifters :  Shifters
+
+    controller_drive_straight : DriveStraightPID
+    controller_turn :           TurnPID
 
     def createObjects(self):
         """
@@ -73,6 +78,20 @@ class MyRobot(magicbot.MagicRobot):
 
         # oi class
         self.oi = OI()
+
+        # pid controllers
+        self.drive_forwards_pid = wpilib.PIDController(
+                                    robotmap.drive_kP,
+                                    robotmap.drive_kI, 
+                                    robotmap.drive_kD,
+                                    lambda: self.drivetrain.get_average_position(),
+                                    lambda x: self.drivetrain.teleop_drive_robot(speed=x))
+        self.turn_pid = wpilib.PIDController(
+                                    robotmap.turn_kP,
+                                    robotmap.turn_kI,
+                                    robotmap.turn_kD,
+                                    lambda: self.navx_board.get_rotation(),
+                                    lambda x: self.drivetrain.teleop_drive_robot(rotation=x))
 
         # launch automatic camera capturing for main drive cam
         wpilib.CameraServer.launch("vision.py:main")
