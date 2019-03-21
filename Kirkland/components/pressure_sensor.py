@@ -3,7 +3,6 @@ from wpilib import AnalogInput
 class AnalogPressureSensor():
 
     #pressure to charge pneumatics to for calibration
-    #TODO figure out the pressure that the switch stops at
     CALIBRATION_PRESSURE = 112
 
     def __init__(self, port):

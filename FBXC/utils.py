@@ -134,6 +134,11 @@ class PIDToleranceController:
             return False
         return False
 
+    def updateConstants(self, kP=0, kI=0, kD=0):
+        self.pidController.kP = kP
+        self.pidController.kI = kI
+        self.pidController.kD = kD
+
     def getOutput(self, i):
         """
         get the output from the pid controller with clamping and gain calculated

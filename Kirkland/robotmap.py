@@ -12,6 +12,7 @@ right_bottom_drive = 3
 # cargo device
 cargo_motor = 8
 
+
 #solenoids
 # there are now two actuators being used to move the extension
 hatch_extension_pcm = 0
@@ -30,12 +31,6 @@ shifter_left_back = 0
 grabber_pcm = 1
 hatch_grab_front = 1
 hatch_grab_back = 0
-
-
-# sensors
-# limit switches for cargo mechanism
-cargo_limit_switch_outside = 0
-cargo_limit_switch_inside = 1
 
 
 # these are just some constants that define robot movement

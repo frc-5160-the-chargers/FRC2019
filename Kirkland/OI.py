@@ -11,26 +11,39 @@ class Side(Enum):
     RIGHT = auto()
 
 class OI:
-    SETTINGSFILE = os.path.dirname(os.path.realpath(__file__)) + "/settings.json"
+    # TODO: determine if we even need this
+    SETTINGSFILE = os.path.dirname(os.path.realpath(__file__)) + "/driverSettings.json"
 
     DEADZONE = 0.1
 
     def __init__(self):
         self.settings = {}
-        
-        self.beastMode = False
-        self.twoStickMode = False
+
+        self.arcade_drive = True
+        self.beast_mode_active = False
 
         self.driver_joystick = wpilib.XboxController(0)
         self.sysop_joystick = wpilib.XboxController(1)
 
     #This method is no longer used but is kept so that the json file can be regenerated if necessary.
-    def write_user_settings(self):
+    @staticmethod
+    def write_user_settings():
+        # TODO: Note that in the future it might be better to put these into arrays so that we can have multiple buttons bound to one control -- just use *in* to check
         settings = {
+            # sysop
             "hatch_grab" : wpilib.XboxController.Button.kB,
             "hatch_extend" : wpilib.XboxController.Button.kY,
-            "drivetrain_shift" : wpilib.XboxController.Button.kY,
-            "drive_foot" : wpilib.XboxController.Button.kB
+            "hatch_autoretrieve" : wpilib.XboxController.Button.kX,
+            "hatch_autoplace" : wpilib.XboxController.Button.kA,
+            "calibrate_pressure_1" : wpilib.XboxController.Button.kStickLeft,
+            "calibrate_pressure_2" : wpilib.XboxController.Button.kStickRight,
+
+            # driver
+            "drivetrain_shift" : wpilib.XboxController.Button.kBumperRight,
+            "beast_mode" : wpilib.XboxController.Button.kA,
+            "arcade_tank_shift" : wpilib.XboxController.Button.kX,
+            "switch_main_camera" : wpilib.XboxController.Button.kB,
+            "driver_override" : wpilib.XboxController.Button.kY
         }
 
         with open(OI.SETTINGSFILE, 'w') as outfile:
@@ -41,7 +54,7 @@ class OI:
             settings_dict = json.load(json_file)
             self.settings = settings_dict
 
-    def getButtonPressed(self, controller : wpilib.XboxController, button):
+    def get_button_pressed(self, controller : wpilib.XboxController, button):
         """
         Get button pressed on a given controller, but do it so that the config file can be used
             param self
@@ -49,11 +62,17 @@ class OI:
             param button: the desired button to check, determined from the config file
         """
         return controller.getRawButtonPressed(button)
+
+    def get_button_pressed_config(self, controller : wpilib.XboxController, button_name):
+        """get button pressed using the names from the config file"""
+        return self.get_button_pressed(controller, self.settings[button_name])
         
     def curve(self, i):
+        """curve controller stick input"""
         return math.pow(i, 3)/1.25
 
     def deadzone(self, i):
+        """see if input is within deadzone"""
         if i < -OI.DEADZONE:
             return i
         elif i > OI.DEADZONE:
@@ -62,45 +81,64 @@ class OI:
             return 0
 
     def process_input(self, joystick_input):
-        return self.deadzone(self.curve(joystick_input) * (-1 if self.beastMode else 1))
+        """apply deadzone and curving to input"""
+        # TODO: consider applying beast mode later
+        return self.deadzone(self.curve(joystick_input))
     
     def process_driver_input(self, robot_side):
-        if self.twoStickMode:
-            if robot_side == Side.LEFT:
-                return self.process_input(self.driver_joystick.getRawAxis(5 if self.beastMode else 1))
-            elif robot_side == Side.RIGHT:
-                return self.process_input(self.driver_joystick.getRawAxis(1 if self.beastMode else 5))
-        else:
-            if robot_side == Side.LEFT:
-                return self.process_input(self.driver_joystick.getRawAxis(1))
-            elif robot_side == Side.RIGHT:
-                return -self.driver_joystick.getRawAxis(4)/1.7
-    
-    def drive_one_foot(self):
-        return self.getButtonPressed(self.driver_joystick, self.settings["drive_foot"])
+        """handle driver input depending on the side passed in"""
+        left_stick = 1
+        right_stick = 5
+        right_stick_x = 4
 
-    def drivetrain_shifting_control(self):
-        return self.getButtonPressed(self.driver_joystick, self.settings["drivetrain_shift"])
+        turn_speed_modifier = 1.7       # yes this is that parameter that will need to be tuned every match because picky drivers
 
-    def hatch_extend_control(self):
-        return self.sysop_joystick.getRawButtonPressed(self.settings["hatch_extend"])
+        if not self.arcade_drive:       # tank drive
+            if robot_side == Side.LEFT:
+                return self.process_input(self.driver_joystick.getRawAxis(left_stick))
+            elif robot_side == Side.RIGHT:
+                return self.process_input(self.driver_joystick.getRawAxis(right_stick))
+        else:                           # arcade drive
+            if robot_side == Side.LEFT:
+                return self.process_input(self.driver_joystick.getRawAxis(left_stick))
+            elif robot_side == Side.RIGHT:
+                return -self.driver_joystick.getRawAxis(right_stick_x)/turn_speed_modifier
     
-    def hatch_grab_control(self):
-        return self.sysop_joystick.getRawButtonPressed(self.settings["hatch_grab"])
+
+    # functions for checking individual buttons
 
     def process_cargo_control(self):
-        i = (self.sysop_joystick.getRawAxis(1)**3)
-        # j = (self.sysop_joystick.getRawAxis(5)**3)/2.33
-        if abs(self.sysop_joystick.getRawAxis(1)) > 0.1:
-            return i
-        # elif abs(self.sysop_joystick.getRawAxis(5)) > 0.1:
-        #    return j
-        else:
-            return 0
+        """get output for the cargo grabber with curving"""
+        i = self.curve(self.deadzone(self.sysop_joystick.getRawAxis(1))) # 1 is the left stick y axis
+        return i
     
     def calibrate_pressure_sensor(self):
-        return (self.sysop_joystick.getRawButtonPressed(self.settings["pressure_cal_1"])
-            and self.sysop_joystick.getRawButtonPressed(self.settings["pressure_cal_2"]))
+        """check and see if the pressure sensor needs to be calibrated"""
+        return self.get_button_pressed_config(self.sysop_joystick, "calibrate_pressure_1") and self.get_button_pressed_config(self.sysop_joystick, "calibrate_pressure_2")
     
     def switch_cameras(self):
-        return self.driver_joystick.getRawButtonPressed(self.settings["camera_switch"])
+        return self.get_button_pressed_config(self.driver_joystick, "switch_main_camera")
+
+    def grab_hatch(self):
+        return self.get_button_pressed_config(self.sysop_joystick, "hatch_grab")
+
+    def extend_hatch(self):
+        return self.get_button_pressed_config(self.sysop_joystick, "hatch_extend")
+        
+    def auto_retrieve_hatch(self):
+        return self.get_button_pressed_config(self.sysop_joystick, "hatch_autoretrieve")
+        
+    def auto_place_hatch(self):
+        return self.get_button_pressed_config(self.sysop_joystick, "hatch_autoplace")
+
+    def shift_drivetrain(self):
+        return self.get_button_pressed_config(self.driver_joystick, "drivetrain_shift")
+
+    def beast_mode(self):
+        return self.get_button_pressed_config(self.driver_joystick, "beast_mode")
+
+    def arcade_tank_shift(self):
+        return self.get_button_pressed_config(self.driver_joystick, "arcade_tank_shift")
+
+    def driver_override(self):
+        return self.get_button_pressed_config(self.driver_joystick, "driver_override")

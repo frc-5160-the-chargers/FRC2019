@@ -59,9 +59,14 @@ class MyRobot(magicbot.MagicRobot):
         # TODO Mount camera
         # wpilib.CameraServer.launch()
 
-        # PID tuning params on smartdashboard
-        wpilib.SmartDashboard.putNumberArray("DriveForwardsPID", [0.2, 0, 0])
-        wpilib.SmartDashboard.putNumberArray("TurnPID", [1, 0, 0])
+        self.driveLabels = ["dKP", "dKI", "dKD"]
+        self.turnLabels = ["tKP", "tKI", "tKD"]
+
+        for i in self.driveLabels:
+            wpilib.SmartDashboard.putNumber(i, 0.1)
+        for i in self.turnLabels:
+            wpilib.SmartDashboard.putNumber(i, 0.1)
+
 
 
     def teleopInit(self):
@@ -106,11 +111,16 @@ class MyRobot(magicbot.MagicRobot):
                 self.drivetrain.start_turn_to_position(90) # turn 90 degrees
             
             if wpilib.XboxController(2).getXButtonPressed():
-                self.drivetrain.drivePid.kP, self.drivetrain.drivePid.kI, self.drivetrain.drivePid.kD = wpilib.SmartDashboard.getNumberArray("DriveForwardsPID", [0, 0, 0])
-
-            if wpilib.XboxController(2).getYButtonPressed():
-                self.drivetrain.turnPid.kP, self.drivetrain.turnPid.kI, self.drivetrain.turnPid.kD = wpilib.SmartDashboard.getNumberArray("TurnPID", [0,0,0])
-
+                self.drivetrain.drivePIDToleranceController.updateConstants(
+                    kP=wpilib.SmartDashboard.getNumber(self.driveLabels[0], 0),
+                    kI=wpilib.SmartDashboard.getNumber(self.driveLabels[1], 0),
+                    kD=wpilib.SmartDashboard.getNumber(self.driveLabels[2], 0)
+                )
+                self.drivetrain.turnPIDToleranceController.updateConstants(
+                    kP=wpilib.SmartDashboard.getNumber(self.turnLabels[0], 0),
+                    kI=wpilib.SmartDashboard.getNumber(self.turnLabels[1], 0),
+                    kD=wpilib.SmartDashboard.getNumber(self.turnLabels[2], 0)
+                )
             if wpilib.XboxController(2).getBumperPressed(wpilib.XboxController.Hand.kRight):
                 self.drivetrain.driver_takeover()
 

@@ -4,7 +4,7 @@ CONTROLLER 1 (main driver)
     left stick      forwards & backwards/tank drive left side
     right stick     turning/tank drive right side
     x               shift from arcade to tank mode and vice versa
-    y               also shift if you are a heretic
+    y               driver override
     a               ｂｅａｓｔ　ｍｏｄｅ
     b               switch cameras
     right bumper    shift
@@ -19,10 +19,3 @@ CONTROLLER 2 (sysop)
     left stick
     and right       calibrate the pressure sensor
     stick
-
-
-CONTROLLER 3 (programmer override stuff)
-    x               turn 90 degrees
-    y               drive 3 feet
-    a               update pid constants
-    b               driver takeover stuff
