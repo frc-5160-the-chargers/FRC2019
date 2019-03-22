@@ -16,3 +16,14 @@ right_encoder_b = 3
 wheel_diameter = 6
 
 inches_per_tick = (6*math.pi)/256
+
+# PID constants
+# driving
+drive_kP = 0
+drive_kI = 0
+drive_kD = 0
+
+# turning
+turn_kP = 0
+turn_kI = 0
+turn_kD = 0

@@ -14,9 +14,14 @@ from motorConfigurator import MotorConfigurator
 
 from components.drivetrain import Drivetrain
 
+from controllers.drivetrain_pid import DriveStraightPID, TurnPID
+
 class MyRobot(magicbot.MagicRobot):
 
-    # High level components - list these first
+    # High level components - list these first    
+    controller_drive_straight : DriveStraightPID
+    controller_turn :           TurnPID
+
 
     # Low level components
     drivetrain : Drivetrain
@@ -67,6 +72,21 @@ class MyRobot(magicbot.MagicRobot):
         for i in self.turnLabels:
             wpilib.SmartDashboard.putNumber(i, 0.1)
 
+        # pid controllers
+        self.drive_forwards_pid = wpilib.PIDController(
+                                    robotmap.drive_kP,
+                                    robotmap.drive_kI, 
+                                    robotmap.drive_kD,
+                                    lambda: self.drivetrain.get_average_position(),
+                                    lambda x: self.drivetrain.teleop_drive_robot(speed=x))
+        self.turn_pid = wpilib.PIDController(
+                                    robotmap.turn_kP,
+                                    robotmap.turn_kI,
+                                    robotmap.turn_kD,
+                                    lambda: self.gyro.getAngle(),
+                                    lambda x: self.drivetrain.teleop_drive_robot(rotation=x))
+
+
 
 
     def teleopInit(self):
@@ -75,6 +95,7 @@ class MyRobot(magicbot.MagicRobot):
         """
         self.gyro.reset()
         self.drivetrain.reset_encoders()
+        self.oi.load_user_settings()
 
         # self.drivetrain.pid.set_setpoint_reset(self.drivetrain.TICKS_PER_INCH*12)
         # self.drivetrain.turn_to_position(90, timeout=5)
@@ -86,45 +107,16 @@ class MyRobot(magicbot.MagicRobot):
         """
         try:
             # handle the drivetrain
-            if self.oi.twoStickMode:
-                self.drivetrain.teleop_drive_robot(self.oi.twoStickMode, self.oi.process_driver_input(Side.LEFT), self.oi.process_driver_input(Side.RIGHT), square_inputs=True)
+            if self.oi.arcade_drive:
+                self.drivetrain.teleop_drive_robot(speed=self.oi.process_driver_input(Side.LEFT), rotation=self.oi.process_driver_input(Side.RIGHT))
             else:
-                self.drivetrain.teleop_drive_robot(self.oi.twoStickMode, self.oi.process_driver_input(Side.LEFT), self.oi.process_driver_input(Side.RIGHT), square_inputs=True)
+                self.drivetrain.teleop_drive_robot(left_speed=self.oi.process_driver_input(Side.LEFT), right_speed=self.oi.process_driver_input(Side.RIGHT))
 
-            # this part does the mode switching for driver control
-            # TODO: move into OI
-            if wpilib.XboxController(0).getAButtonPressed():
-                self.oi.beastMode = not self.oi.beastMode
-            if wpilib.XboxController(0).getXButtonPressed():
-                self.oi.twoStickMode = not self.oi.twoStickMode
-                self.drivetrain.driver_takeover()
+            if self.oi.arcade_tank_shift():
+                self.oi.arcade_drive = not self.oi.arcade_drive
 
-            # PID Testing is on the third controller
-            # a: drive 3 feet
-            # b: turn 90 degrees
-            # x: read distance pid values
-            # y: read turn pid values
-            if wpilib.XboxController(2).getAButtonPressed():
-                self.drivetrain.start_drive_to_position(12*3, timeout=20, tolerance=0.1, timeStable=3) # drive 3 feet or something
-            
-            if wpilib.XboxController(2).getBButtonPressed():
-                self.drivetrain.start_turn_to_position(90) # turn 90 degrees
-            
-            if wpilib.XboxController(2).getXButtonPressed():
-                self.drivetrain.drivePIDToleranceController.updateConstants(
-                    kP=wpilib.SmartDashboard.getNumber(self.driveLabels[0], 0),
-                    kI=wpilib.SmartDashboard.getNumber(self.driveLabels[1], 0),
-                    kD=wpilib.SmartDashboard.getNumber(self.driveLabels[2], 0)
-                )
-                self.drivetrain.turnPIDToleranceController.updateConstants(
-                    kP=wpilib.SmartDashboard.getNumber(self.turnLabels[0], 0),
-                    kI=wpilib.SmartDashboard.getNumber(self.turnLabels[1], 0),
-                    kD=wpilib.SmartDashboard.getNumber(self.turnLabels[2], 0)
-                )
-            if wpilib.XboxController(2).getBumperPressed(wpilib.XboxController.Hand.kRight):
-                self.drivetrain.driver_takeover()
-
-            print(self.gyro.getAngle())
+            if self.oi.beast_mode():
+                self.controller_drive_straight.drive_distance(500)
 
         except:
             self.onException()
