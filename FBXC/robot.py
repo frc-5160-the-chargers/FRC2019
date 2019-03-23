@@ -68,9 +68,9 @@ class MyRobot(magicbot.MagicRobot):
         self.turnLabels = ["tKP", "tKI", "tKD"]
 
         for i in self.driveLabels:
-            wpilib.SmartDashboard.putNumber(i, 0.1)
+            wpilib.SmartDashboard.putNumber(i, 0)
         for i in self.turnLabels:
-            wpilib.SmartDashboard.putNumber(i, 0.1)
+            wpilib.SmartDashboard.putNumber(i, 0)
 
         # pid controllers
         self.drive_forwards_pid = wpilib.PIDController(
@@ -113,10 +113,26 @@ class MyRobot(magicbot.MagicRobot):
 
             if self.oi.arcade_tank_shift():
                 self.oi.arcade_drive = not self.oi.arcade_drive
-
-            if self.oi.beast_mode():
-               self.controller_drive_straight.drive_distance(12)
             
+            # read the pid stuff from smartdashboard if button is pressed
+            if wpilib.XboxController(2).getXButtonPressed():
+                def loadLabelsController(pidController, labels):
+                    constants = [wpilib.SmartDashboard.getNumber(i, 0) for i in labels]
+                    pidController.setP(constants[0])
+                    pidController.setI(constants[1])
+                    pidController.setD(constants[2])
+                loadLabelsController(self.drive_forwards_pid, self.driveLabels)
+                loadLabelsController(self.turn_pid, self.turnLabels)
+
+            # do pid testing routines if button is pressed
+            # drive 36 inches
+            if wpilib.XboxController(2).getAButtonPressed():
+                self.controller_drive_straight.drive_distance(36)
+            
+            # turn 90 degrees
+            if wpilib.XboxController(2).getBButtonPressed():
+                self.controller_turn.turn_distance(90)
+
             print(self.controller_drive_straight.drive_forwards_pid.getError())
 
         except:

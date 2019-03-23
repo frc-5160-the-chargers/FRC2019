@@ -179,6 +179,8 @@ class MyRobot(magicbot.MagicRobot):
             wpilib.SmartDashboard.putString("Tank drive", "Active" if self.drivetrain.current_mode != self.oi.arcade_drive else "Disabled")
             wpilib.SmartDashboard.putString("Beast mode", "Active" if self.oi.beast_mode_active else "Disabled")
 
+            wpilib.SmartDashboard.putString("PixyCam Status", "Line Detected" if self.arduino_component.safe_to_detect() else "Line not detected")
+
             # read the pid stuff from smartdashboard if button is pressed
             if wpilib.XboxController(2).getXButtonPressed():
                 def loadLabelsController(pidController, labels):
