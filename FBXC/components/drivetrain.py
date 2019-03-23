@@ -4,6 +4,7 @@ from ctre import WPI_TalonSRX
 from wpilib import SpeedControllerGroup, Encoder, ADXRS450_Gyro
 from wpilib.drive import DifferentialDrive
 
+import utils
 import robotmap
 
 from OI import OI, Side
@@ -77,6 +78,7 @@ class Drivetrain:
         self.current_mode = DriveModes.DRIVEROPERATED
 
     def execute(self):
+        self.speed = utils.MathFunctions.clamp(self.speed, -.5, .5)
         if self.current_mode == DriveModes.DRIVEROPERATED:
             if self.oi.arcade_drive:
                 self.drive.arcadeDrive(self.speed, self.rotation)

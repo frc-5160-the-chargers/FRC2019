@@ -19,11 +19,11 @@ inches_per_tick = (6*math.pi)/256
 
 # PID constants
 # driving
-drive_kP = 0
+drive_kP = 0.2
 drive_kI = 0
 drive_kD = 0
 
 # turning
-turn_kP = 0
+turn_kP = 0.1
 turn_kI = 0
 turn_kD = 0

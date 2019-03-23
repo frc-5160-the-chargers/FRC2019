@@ -79,14 +79,14 @@ class MyRobot(magicbot.MagicRobot):
                                     robotmap.drive_kD,
                                     lambda: self.drivetrain.get_average_position(),
                                     lambda x: self.drivetrain.teleop_drive_robot(speed=x))
+        self.drive_forwards_pid.setToleranceBuffer(5)
         self.turn_pid = wpilib.PIDController(
                                     robotmap.turn_kP,
                                     robotmap.turn_kI,
                                     robotmap.turn_kD,
                                     lambda: self.gyro.getAngle(),
                                     lambda x: self.drivetrain.teleop_drive_robot(rotation=x))
-
-
+        self.turn_pid.setToleranceBuffer(5)
 
 
     def teleopInit(self):
@@ -99,7 +99,6 @@ class MyRobot(magicbot.MagicRobot):
 
         # self.drivetrain.pid.set_setpoint_reset(self.drivetrain.TICKS_PER_INCH*12)
         # self.drivetrain.turn_to_position(90, timeout=5)
-
 
     def teleopPeriodic(self):
         """
@@ -116,7 +115,9 @@ class MyRobot(magicbot.MagicRobot):
                 self.oi.arcade_drive = not self.oi.arcade_drive
 
             if self.oi.beast_mode():
-                self.controller_drive_straight.drive_distance(500)
+               self.controller_drive_straight.drive_distance(12)
+            
+            print(self.controller_drive_straight.drive_forwards_pid.getError())
 
         except:
             self.onException()
