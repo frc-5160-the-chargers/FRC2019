@@ -5,17 +5,23 @@ from threading import Thread
 import math
 
 class Vector:
-    def __init__(self, inStr):
-        inStr = str(inStr).split(")")
-        pair1 = inStr[0][9:].split(" ")
-        pair2 = inStr[1][2:].split(" ")
-        self.originPoint = [int(pair1[0]), int(pair1[1])]
-        self.endPoint = [int(pair2[0]), int(pair2[1])]
+    def __init__(self, inStr=None):
+        if inStr != None:
+            inStr = str(inStr).split(")")
+            pair1 = inStr[0][9:].split(" ")
+            pair2 = inStr[1][2:].split(" ")
+            self.originPoint = [int(pair1[0]), int(pair1[1])]
+            self.endPoint = [int(pair2[0]), int(pair2[1])]
+        else:
+            self.originPoint = [0, 0]
+            self.endPoint = [0, 0]
+        # 0 0 is the top left
         self.compound = [self.endPoint[0]-self.originPoint[0], self.endPoint[1]-self.originPoint[1]]
         self.slope = self.compound[1]/self.compound[0] if self.compound[0] != 0 else 0
         self.yIntercept = self.slope*(-self.originPoint[0])+self.originPoint[1]
         self.vectorDetected = not (self.originPoint == [129, 0] and self.endPoint == [254, 188])
         self.realSlope = self.compound[0] != 0
+        self.center = self.originPoint[0] + ((self.endPoint[0] - self.originPoint[0]) / 2)
 
     def __str__(self):
         if self.realSlope and self.vectorDetected:

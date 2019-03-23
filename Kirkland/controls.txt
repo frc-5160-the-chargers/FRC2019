@@ -23,6 +23,6 @@ CONTROLLER 2 (sysop)
 
 CONTROLLER 3 (testing utils)
     x               load in pid settings from smartdashboard
-    y               
+    y               test alignment routine
     a               drive 36 inches
     b               turn 90 degrees

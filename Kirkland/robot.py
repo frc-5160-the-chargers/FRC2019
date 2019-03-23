@@ -8,8 +8,12 @@ from components.navx import NavX
 from components.drivetrain import Drivetrain
 from components.pneumatic_assemblies import HatchGrab, HatchRack, Shifters
 from components.cargo_mechanism import CargoMechanism
+from components.arduino import ArduinoHandler
 
 from controllers.drivetrain_pid import DriveStraightPID, TurnPID
+from controllers.alignment_routine import AlignmentController
+
+from arduino.data_server import ArduinoServer
 
 import robotmap
 from motor_configurator import configure_cargo_redline, bulk_config_drivetrain 
@@ -23,9 +27,11 @@ class MyRobot(magicbot.MagicRobot):
     hatch_rack :        HatchRack
     hatch_grab :        HatchGrab
     gearbox_shifters :  Shifters
+    arduino_component : ArduinoHandler
 
     controller_drive_straight : DriveStraightPID
     controller_turn :           TurnPID
+    controller_alignment :      AlignmentController
 
     def createObjects(self):
         """
@@ -106,6 +112,10 @@ class MyRobot(magicbot.MagicRobot):
         # launch automatic camera capturing for main drive cam
         wpilib.CameraServer.launch("vision.py:main")
 
+        # launch arduino code and start data server
+        self.arduino_server = ArduinoServer()
+        self.arduino_server.startServer()
+
 
     def teleopInit(self):
         """
@@ -114,6 +124,7 @@ class MyRobot(magicbot.MagicRobot):
         self.oi.load_user_settings()
         self.navx_board.reset_rotation()
         
+
     def teleopPeriodic(self):
         """
         Called on each iteration of the control loop for both auton and tele
@@ -186,6 +197,9 @@ class MyRobot(magicbot.MagicRobot):
             # turn 90 degrees
             if wpilib.XboxController(2).getBButtonPressed():
                 self.controller_turn.turn_distance(90)
+            
+            if wpilib.XboxController(2).getYButtonPressed():
+                self.controller_alignment.start_alignment()
         except:
             self.onException()
 

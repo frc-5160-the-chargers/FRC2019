@@ -59,3 +59,10 @@ turn_buffer = 5
 # drivetrain when pid controlling
 drive_pid_power_straight = .5
 drive_pid_power_turn = .25
+
+
+# Constants for the arduino server logic
+gathering_buffer = 10       # take the last x vectors to calculate
+gathering_time = 5          # if the number of failed detections is greater than this, dont use data
+camera_center = 78/2        # center coordinate of camera
+drive_power_constant = .2   # kind of like a P constant in a way, multiplied by center error to get power
