@@ -8,6 +8,8 @@ import robotmap
 
 from oi import OI, Side
 
+import utils
+
 class DriveModes(enum.Enum):
     DRIVEROPERATED = enum.auto()
     PIDOPERATED = enum.auto()
@@ -88,4 +90,7 @@ class Drivetrain:
                 self.drive.tankDrive(self.left_speed, self.right_speed)
 
         if self.current_mode == DriveModes.PIDOPERATED:
+            # NOTE when doing pid driving it is usually a good idea to limit the speed a bit 
+            self.speed = utils.clamp(self.speed, -robotmap.drive_pid_power_straight, robotmap.drive_pid_power_straight)
+            self.rotation = utils.clamp(self.rotation, -robotmap.drive_pid_power_turn, robotmap.drive_pid_power_turn)
             self.drive.arcadeDrive(self.speed, self.rotation)

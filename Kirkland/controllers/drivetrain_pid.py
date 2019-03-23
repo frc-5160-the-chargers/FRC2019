@@ -12,7 +12,7 @@ class DriveStraightPID(StateMachine):
     drive_forwards_pid :    PIDController
 
     def drive_distance(self, distance):
-        self.drive_forwards_pid.setAbsoluteTolerance(0.5) # lets give it half an inch of tolerance
+        self.drive_forwards_pid.setAbsoluteTolerance(0.05)
         self.drive_forwards_pid.setSetpoint(distance)
 
         self.drivetrain.stop_motors()
@@ -35,8 +35,9 @@ class DriveStraightPID(StateMachine):
 
         self.next_state_now('drive')
         
-    @timed_state(duration=5)
+    @timed_state(duration=5, must_finish=True)
     def drive(self):
+        self.drivetrain.teleop_drive_robot(speed=self.drive_forwards_pid.get())
         if self.drive_forwards_pid.onTarget():
             self.drive_forwards_pid.disable()
             self.drivetrain.stop_motors()
@@ -74,8 +75,9 @@ class TurnPID(StateMachine):
 
         self.next_state_now('turn')
         
-    @timed_state(duration=5)
+    @timed_state(duration=5, must_finish=True)
     def turn(self):
+        self.drivetrain.teleop_drive_robot(rotation=self.turn_pid.get())
         if self.turn_pid.onTarget():
             self.turn_pid.disable()
             self.drivetrain.stop_motors()

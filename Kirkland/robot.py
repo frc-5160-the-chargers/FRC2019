@@ -92,6 +92,8 @@ class MyRobot(magicbot.MagicRobot):
                                     robotmap.turn_kD,
                                     lambda: self.navx_board.get_rotation(),
                                     lambda x: self.drivetrain.teleop_drive_robot(rotation=x))
+        self.drive_forwards_pid.setToleranceBuffer(robotmap.drive_buffer)
+        self.turn_pid.setToleranceBuffer(robotmap.turn_buffer)
 
         # launch automatic camera capturing for main drive cam
         wpilib.CameraServer.launch("vision.py:main")

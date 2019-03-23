@@ -43,11 +43,19 @@ ticks_per_inch = ticks_per_output_shaft_rotation/wheel_circumference
 
 # PID constants
 # driving
-drive_kP = 0
+drive_kP = 0.2
 drive_kI = 0
 drive_kD = 0
+drive_buffer = 5
 
 # turning
-turn_kP = 0
+turn_kP = 0.1
 turn_kI = 0
 turn_kD = 0
+turn_buffer = 5
+
+
+# speed limits
+# drivetrain when pid controlling
+drive_pid_power_straight = .5
+drive_pid_power_turn = .25
