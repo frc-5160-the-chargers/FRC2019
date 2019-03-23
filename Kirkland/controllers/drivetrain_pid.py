@@ -38,7 +38,7 @@ class DriveStraightPID(StateMachine):
     @timed_state(duration=5, must_finish=True)
     def drive(self):
         self.drivetrain.teleop_drive_robot(speed=self.drive_forwards_pid.get())
-        if self.drive_forwards_pid.onTarget():
+        if self.drive_forwards_pid.onTarget() or self.drivetrain.current_mode != DriveModes.PIDOPERATED:
             self.drive_forwards_pid.disable()
             self.drivetrain.stop_motors()
             self.drivetrain.driver_takeover()
@@ -78,7 +78,7 @@ class TurnPID(StateMachine):
     @timed_state(duration=5, must_finish=True)
     def turn(self):
         self.drivetrain.teleop_drive_robot(rotation=self.turn_pid.get())
-        if self.turn_pid.onTarget():
+        if self.turn_pid.onTarget() or self.drivetrain.current_mode != DriveModes.PIDOPERATED:
             self.turn_pid.disable()
             self.drivetrain.stop_motors()
             self.drivetrain.driver_takeover()

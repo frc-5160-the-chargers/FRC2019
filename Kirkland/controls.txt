@@ -19,3 +19,10 @@ CONTROLLER 2 (sysop)
     left stick
     and right       calibrate the pressure sensor
     stick
+
+
+CONTROLLER 3 (testing utils)
+    x               load in pid settings from smartdashboard
+    y               
+    a               drive 36 inches
+    b               turn 90 degrees

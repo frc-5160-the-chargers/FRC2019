@@ -95,8 +95,17 @@ class MyRobot(magicbot.MagicRobot):
         self.drive_forwards_pid.setToleranceBuffer(robotmap.drive_buffer)
         self.turn_pid.setToleranceBuffer(robotmap.turn_buffer)
 
+        # setup smartdashboard for live pid updates
+        self.drive_pid_labels = ["drive_kP", "drive_kI", "drive_kD"]
+        self.turn_pid_labels = ["turn_kP", "turn_kI", "turn_kD"]
+        for i in self.drive_pid_labels:
+            wpilib.SmartDashboard.putNumber(i, 0)
+        for i in self.turn_pid_labels:
+            wpilib.SmartDashboard.putNumber(i, 0)
+
         # launch automatic camera capturing for main drive cam
         wpilib.CameraServer.launch("vision.py:main")
+
 
     def teleopInit(self):
         """
@@ -158,6 +167,25 @@ class MyRobot(magicbot.MagicRobot):
 
             wpilib.SmartDashboard.putString("Tank drive", "Active" if self.drivetrain.current_mode != self.oi.arcade_drive else "Disabled")
             wpilib.SmartDashboard.putString("Beast mode", "Active" if self.oi.beast_mode_active else "Disabled")
+
+            # read the pid stuff from smartdashboard if button is pressed
+            if wpilib.XboxController(2).getXButtonPressed():
+                def loadLabelsController(pidController, labels):
+                    constants = [wpilib.SmartDashboard.getNumber(i, 0) for i in labels]
+                    pidController.setP(constants[0])
+                    pidController.setI(constants[1])
+                    pidController.setD(constants[2])
+                loadLabelsController(self.drive_forwards_pid, self.drive_pid_labels)
+                loadLabelsController(self.turn_pid, self.turn_pid_labels)
+
+            # do pid testing routines if button is pressed
+            # drive 36 inches
+            if wpilib.XboxController(2).getAButtonPressed():
+                self.controller_drive_straight.drive_distance(36)
+            
+            # turn 90 degrees
+            if wpilib.XboxController(2).getBButtonPressed():
+                self.controller_turn.turn_distance(90)
         except:
             self.onException()
 
