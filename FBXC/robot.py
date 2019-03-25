@@ -79,14 +79,12 @@ class MyRobot(magicbot.MagicRobot):
                                     robotmap.drive_kD,
                                     lambda: self.drivetrain.get_average_position(),
                                     lambda x: self.drivetrain.teleop_drive_robot(speed=x))
-        self.drive_forwards_pid.setToleranceBuffer(5)
         self.turn_pid = wpilib.PIDController(
                                     robotmap.turn_kP,
                                     robotmap.turn_kI,
                                     robotmap.turn_kD,
                                     lambda: self.gyro.getAngle(),
                                     lambda x: self.drivetrain.teleop_drive_robot(rotation=x))
-        self.turn_pid.setToleranceBuffer(5)
 
 
     def teleopInit(self):

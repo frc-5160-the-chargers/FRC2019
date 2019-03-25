@@ -32,14 +32,16 @@ class DriveStraightPID(StateMachine):
 
         self.next_state_now('drive')
         
-    @timed_state(duration=5, must_finish=True)
+    @timed_state(duration=10, must_finish=True, next_state='finish_drive')
     def drive(self):
         self.drivetrain.teleop_drive_robot(speed=-self.drive_forwards_pid.get())
-        if self.drive_forwards_pid.onTarget():
-            self.drive_forwards_pid.disable()
-            self.drivetrain.stop_motors()
-            self.drivetrain.driver_takeover()
-            self.done()
+
+    @state()
+    def finish_drive(self):
+        self.drive_forwards_pid.disable()
+        self.drivetrain.stop_motors()
+        self.drivetrain.driver_takeover()
+        self.done()
 
 
 class TurnPID(StateMachine):
