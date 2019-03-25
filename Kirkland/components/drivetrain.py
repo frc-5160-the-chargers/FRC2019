@@ -97,6 +97,6 @@ class Drivetrain:
             self.drive.arcadeDrive(self.speed, self.rotation)
 
         if self.current_mode == DriveModes.ALIGNMENTOPERATED:
-            self.left_speed = utils.clamp(self.left_speed, -robotmap.drive_pid_power_straight, robotmap.drive_pid_power_straight)
-            self.right_speed = utils.clamp(self.right_speed, -robotmap.drive_pid_power_straight, robotmap.drive_pid_power_straight)
+            self.left_speed = utils.clamp(self.left_speed, -robotmap.drive_pid_power_turn, robotmap.drive_pid_power_turn)
+            self.right_speed = utils.clamp(self.right_speed, -robotmap.drive_pid_power_turn, robotmap.drive_pid_power_turn)
             self.drive.tankDrive(self.left_speed, self.right_speed)

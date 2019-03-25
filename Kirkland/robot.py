@@ -202,6 +202,9 @@ class MyRobot(magicbot.MagicRobot):
             
             if wpilib.XboxController(2).getYButtonPressed():
                 self.controller_alignment.start_alignment()
+
+            if wpilib.XboxController(2).getBumperPressed(wpilib.XboxController.Hand.kRight):
+                self.controller_alignment.interrupt()
         except:
             self.onException()
 

@@ -2,6 +2,8 @@
 
 Pixy2 pixy;
 
+int samplingRate = 30; // number of samples to get every second so as not to screw up the buffer on the arduino
+
 void setup() {
     // start serial comms
     Serial.begin(9600);
@@ -14,4 +16,5 @@ void setup() {
 void loop() {
     pixy.line.getMainFeatures();
     pixy.line.vectors[0].print();
+    delay((int) (1000/samplingRate));
 }
