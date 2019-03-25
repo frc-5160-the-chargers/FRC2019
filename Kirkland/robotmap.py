@@ -58,7 +58,7 @@ turn_buffer = 5
 # speed limits
 # drivetrain when pid controlling
 drive_pid_power_straight = .5
-drive_pid_power_turn = .25
+drive_pid_power_turn = .5
 
 
 # Constants for the arduino server logic

@@ -1,4 +1,5 @@
 from arduino.data_server import ArduinoServer, Vector
+# from arduino.serial_spoofed import ArduinoServer
 
 import robotmap
 
@@ -30,6 +31,6 @@ class ArduinoHandler:
                 sumPositions += i.center-robotmap.camera_center
                 sumBottomPositions += i.closestX-robotmap.camera_center
             self.average_line_position = sumPositions / len(self.last_lines)
-            self.average_bottom_line_position = sumBottomPositions / len(self.average_bottom_line_position)
+            self.average_bottom_line_position = sumBottomPositions / len(self.last_lines)
         else:
             self.failed_lines += 1

@@ -58,6 +58,7 @@ class AlignmentController(StateMachine):
         self.drive_with_alignment(self.arduino_component.average_line_position)
         self.line_detect_failsafe_checker()
 
-    @state()
+    @state(must_finish=True)
     def stop_alignment_process(self):
         self.stop_reset_drivetrain()
+        self.done()

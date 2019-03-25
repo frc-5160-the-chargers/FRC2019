@@ -5,7 +5,7 @@ import navx
 
 from components.pressure_sensor import AnalogPressureSensor
 from components.navx import NavX
-from components.drivetrain import Drivetrain
+from components.drivetrain import Drivetrain, DriveModes
 from components.pneumatic_assemblies import HatchGrab, HatchRack, Shifters
 from components.cargo_mechanism import CargoMechanism
 from components.arduino import ArduinoHandler
@@ -14,6 +14,7 @@ from controllers.drivetrain_pid import DriveStraightPID, TurnPID
 from controllers.alignment_routine import AlignmentController
 
 from arduino.data_server import ArduinoServer
+# from arduino.serial_spoofed import ArduinoServer
 
 import robotmap
 from motor_configurator import configure_cargo_redline, bulk_config_drivetrain 
@@ -132,10 +133,11 @@ class MyRobot(magicbot.MagicRobot):
         # TODO Individual try catches
         try:
             # set drivetrain power
-            if self.oi.arcade_drive:
-                self.drivetrain.teleop_drive_robot(speed=self.oi.process_driver_input(Side.LEFT), rotation=self.oi.process_driver_input(Side.RIGHT))
-            else:
-                self.drivetrain.teleop_drive_robot(left_speed=self.oi.process_driver_input(Side.LEFT), right_speed=self.oi.process_driver_input(Side.RIGHT))
+            if self.drivetrain.current_mode == DriveModes.DRIVEROPERATED:
+                if self.oi.arcade_drive:
+                    self.drivetrain.teleop_drive_robot(speed=self.oi.process_driver_input(Side.LEFT), rotation=self.oi.process_driver_input(Side.RIGHT))
+                else:
+                    self.drivetrain.teleop_drive_robot(left_speed=self.oi.process_driver_input(Side.LEFT), right_speed=self.oi.process_driver_input(Side.RIGHT))
 
             #calibrate the analog pressure sensor
             if self.oi.calibrate_pressure_sensor():
