@@ -6,8 +6,6 @@ from components.arduino import ArduinoHandler
 
 from wpilib import PIDController
 
-import robotmap
-
 class AlignmentController(StateMachine):
     drivetrain :        Drivetrain
     gearbox_shifters :  Shifters
@@ -27,8 +25,12 @@ class AlignmentController(StateMachine):
         self.done()
 
     def drive_with_alignment(self, position):
-        p = position*robotmap.drive_power_constant
-        self.drivetrain.teleop_drive_robot(left_speed=p, right_speed=-p)
+        print(position)
+        p = -position*self.drivetrain.drive_power_align_constant
+        if p > 0:
+            self.drivetrain.teleop_drive_robot(left_speed=0, right_speed=-p)
+        else:
+            self.drivetrain.teleop_drive_robot(left_speed=p, right_speed=0)
         self.line_detect_failsafe_checker()
 
     def start_alignment(self):
@@ -42,7 +44,7 @@ class AlignmentController(StateMachine):
         self.gearbox_shifters.shift_down()
         self.next_state_now('alignment_process_bottom')
 
-    @timed_state(duration=3, must_finish=True, next_state='alignment_process_center')
+    @timed_state(duration=5, must_finish=True, next_state='alignment_process_center')
     def alignment_process_bottom(self):
         # NOTE so for this, just look at the average line position and apply power as needed based on it
         # see the line-alignment-routine.md document for more info
@@ -52,7 +54,7 @@ class AlignmentController(StateMachine):
         # ok failsafe adds more...
         self.line_detect_failsafe_checker()
     
-    @timed_state(duration=3, must_finish=True, next_state='stop_alignment_process')
+    @timed_state(duration=5, must_finish=True, next_state='stop_alignment_process')
     def alignment_process_center(self):
         # once the robot is aligned with the closest part of the line then it should be able to align with the rest
         self.drive_with_alignment(self.arduino_component.average_line_position)

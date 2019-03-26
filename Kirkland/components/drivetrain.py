@@ -39,6 +39,8 @@ class Drivetrain:
 
         self.current_mode = DriveModes.DRIVEROPERATED
 
+        self.drive_power_align_constant = robotmap.drive_power_constant
+
     def teleop_drive_robot(self, left_speed=0, right_speed=0, speed=0, rotation=0):
         self.left_speed = left_speed
         self.right_speed = right_speed

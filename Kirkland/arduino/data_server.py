@@ -20,7 +20,7 @@ class Vector:
         self.compound = [self.endPoint[0]-self.originPoint[0], self.endPoint[1]-self.originPoint[1]]
         self.slope = self.compound[1]/self.compound[0] if self.compound[0] != 0 else 0
         self.yIntercept = self.slope*(-self.originPoint[0])+self.originPoint[1]
-        self.vectorDetected = not (self.originPoint == [129, 0] and self.endPoint == [254, 188])
+        self.vectorDetected = self.originPoint[0] > 0 and self.originPoint[0] < 100 and self.endPoint[0] > -0 and self.endPoint[0] < 100
         self.realSlope = self.compound[0] != 0
         self.center = self.originPoint[0] + ((self.endPoint[0] - self.originPoint[0]) / 2)
         self.closestX = self.endPoint[0] if self.endPoint[1] > self.originPoint[1] else self.originPoint[0]

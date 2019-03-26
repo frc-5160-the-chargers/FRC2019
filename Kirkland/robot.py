@@ -105,10 +105,12 @@ class MyRobot(magicbot.MagicRobot):
         # setup smartdashboard for live pid updates
         self.drive_pid_labels = ["drive_kP", "drive_kI", "drive_kD"]
         self.turn_pid_labels = ["turn_kP", "turn_kI", "turn_kD"]
+        self.alignment_label = "align_kP"
         for i in self.drive_pid_labels:
             wpilib.SmartDashboard.putNumber(i, 0)
         for i in self.turn_pid_labels:
             wpilib.SmartDashboard.putNumber(i, 0)
+        wpilib.SmartDashboard.putNumber(self.alignment_label, robotmap.drive_power_constant)
 
         # launch automatic camera capturing for main drive cam
         wpilib.CameraServer.launch("vision.py:main")
@@ -124,7 +126,8 @@ class MyRobot(magicbot.MagicRobot):
         """
         self.oi.load_user_settings()
         self.navx_board.reset_rotation()
-        
+        self.controller_alignment.stop_reset_drivetrain()
+
 
     def teleopPeriodic(self):
         """
@@ -132,6 +135,7 @@ class MyRobot(magicbot.MagicRobot):
         """
         # TODO Individual try catches
         try:
+            print(self.arduino_component.average_line_position)
             # set drivetrain power
             if self.drivetrain.current_mode == DriveModes.DRIVEROPERATED:
                 if self.oi.arcade_drive:
@@ -192,6 +196,7 @@ class MyRobot(magicbot.MagicRobot):
                     pidController.setD(constants[2])
                 loadLabelsController(self.drive_forwards_pid, self.drive_pid_labels)
                 loadLabelsController(self.turn_pid, self.turn_pid_labels)
+                self.drivetrain.drive_power_align_constant = wpilib.SmartDashboard.getNumber(self.alignment_label, 0.2)
 
             # do pid testing routines if button is pressed
             # drive 36 inches
