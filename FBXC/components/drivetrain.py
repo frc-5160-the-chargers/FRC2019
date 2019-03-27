@@ -12,6 +12,7 @@ from OI import OI, Side
 class DriveModes(enum.Enum):
     DRIVEROPERATED = enum.auto()
     PIDOPERATED = enum.auto()
+    ALIGNMENTOPERATED = enum.auto()
 
 class Drivetrain:
     right_front_motor:  WPI_TalonSRX
@@ -87,3 +88,8 @@ class Drivetrain:
 
         if self.current_mode == DriveModes.PIDOPERATED:
             self.drive.arcadeDrive(self.speed, self.rotation)
+
+        if self.current_mode == DriveModes.ALIGNMENTOPERATED:
+            self.left_speed = utils.clamp(self.left_speed, -0.5, 0.25)
+            self.right_speed = utils.clamp(self.right_speed, -0.5, 0.5)
+            self.drive.tankDrive(self.left_speed, self.right_speed)

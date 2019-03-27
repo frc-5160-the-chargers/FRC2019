@@ -6,25 +6,31 @@ import wpilib.drive
 
 import ctre
 
+from components.arduino import ArduinoHandler
+
+from arduino.data_server import ArduinoServer
+
 import robotmap
 import OI
 from OI import Side
 
 from motorConfigurator import MotorConfigurator
 
-from components.drivetrain import Drivetrain
+from components.drivetrain import Drivetrain, DriveModes
 
-from controllers.drivetrain_pid import DriveStraightPID, TurnPID
+from controllers.alignment_routine import AlignmentController
 
 class MyRobot(magicbot.MagicRobot):
 
-    # High level components - list these first    
-    controller_drive_straight : DriveStraightPID
-    controller_turn :           TurnPID
+    # High level components - list these first
+    controller_alignment :      AlignmentController
+
 
 
     # Low level components
     drivetrain : Drivetrain
+    arduino_component : ArduinoHandler
+
 
     def createObjects(self):
         """
@@ -62,29 +68,11 @@ class MyRobot(magicbot.MagicRobot):
 
         # launch automatic camera capturing for main drive cam
         # TODO Mount camera
-        # wpilib.CameraServer.launch()
+        wpilib.CameraServer.launch()
 
-        self.driveLabels = ["dKP", "dKI", "dKD"]
-        self.turnLabels = ["tKP", "tKI", "tKD"]
-
-        for i in self.driveLabels:
-            wpilib.SmartDashboard.putNumber(i, 0)
-        for i in self.turnLabels:
-            wpilib.SmartDashboard.putNumber(i, 0)
-
-        # pid controllers
-        self.drive_forwards_pid = wpilib.PIDController(
-                                    robotmap.drive_kP,
-                                    robotmap.drive_kI, 
-                                    robotmap.drive_kD,
-                                    lambda: self.drivetrain.get_average_position(),
-                                    lambda x: self.drivetrain.teleop_drive_robot(speed=x))
-        self.turn_pid = wpilib.PIDController(
-                                    robotmap.turn_kP,
-                                    robotmap.turn_kI,
-                                    robotmap.turn_kD,
-                                    lambda: self.gyro.getAngle(),
-                                    lambda x: self.drivetrain.teleop_drive_robot(rotation=x))
+        # launch arduino code and start data server
+        self.arduino_server = ArduinoServer()
+        self.arduino_server.startServer()
 
 
     def teleopInit(self):
@@ -95,6 +83,9 @@ class MyRobot(magicbot.MagicRobot):
         self.drivetrain.reset_encoders()
         self.oi.load_user_settings()
 
+        self.controller_alignment.stop_reset_drivetrain()
+
+
         # self.drivetrain.pid.set_setpoint_reset(self.drivetrain.TICKS_PER_INCH*12)
         # self.drivetrain.turn_to_position(90, timeout=5)
 
@@ -104,35 +95,25 @@ class MyRobot(magicbot.MagicRobot):
         """
         try:
             # handle the drivetrain
-            if self.oi.arcade_drive:
-                self.drivetrain.teleop_drive_robot(speed=self.oi.process_driver_input(Side.LEFT), rotation=self.oi.process_driver_input(Side.RIGHT))
-            else:
-                self.drivetrain.teleop_drive_robot(left_speed=self.oi.process_driver_input(Side.LEFT), right_speed=self.oi.process_driver_input(Side.RIGHT))
+            if self.drivetrain.current_mode == DriveModes.DRIVEROPERATED:
+                if self.oi.arcade_drive:
+                    self.drivetrain.teleop_drive_robot(speed=self.oi.process_driver_input(Side.LEFT), rotation=self.oi.process_driver_input(Side.RIGHT))
+                else:
+                    self.drivetrain.teleop_drive_robot(left_speed=self.oi.process_driver_input(Side.LEFT), right_speed=self.oi.process_driver_input(Side.RIGHT))
 
             if self.oi.arcade_tank_shift():
                 self.oi.arcade_drive = not self.oi.arcade_drive
             
-            # read the pid stuff from smartdashboard if button is pressed
-            if wpilib.XboxController(2).getXButtonPressed():
-                def loadLabelsController(pidController, labels):
-                    constants = [wpilib.SmartDashboard.getNumber(i, 0) for i in labels]
-                    pidController.setP(constants[0])
-                    pidController.setI(constants[1])
-                    pidController.setD(constants[2])
-                loadLabelsController(self.drive_forwards_pid, self.driveLabels)
-                loadLabelsController(self.turn_pid, self.turnLabels)
-
             # do pid testing routines if button is pressed
             # drive 36 inches
             if wpilib.XboxController(2).getAButtonPressed():
-                self.controller_drive_straight.drive_distance(36)
+                self.controller_alignment.start_alignment()
             
             # turn 90 degrees
             if wpilib.XboxController(2).getBButtonPressed():
-                self.controller_turn.turn_distance(90)
+                self.controller_alignment.interrupt()
 
-            print(self.controller_drive_straight.drive_forwards_pid.getError())
-
+            wpilib.SmartDashboard.putString("PixyCam Status", "Line Detected" if self.arduino_component.safe_to_detect() else "Line not detected")
         except:
             self.onException()
 
