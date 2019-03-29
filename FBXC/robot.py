@@ -106,11 +106,11 @@ class MyRobot(magicbot.MagicRobot):
             
             # do pid testing routines if button is pressed
             # drive 36 inches
-            if wpilib.XboxController(2).getAButtonPressed():
+            if wpilib.XboxController(0).getAButtonPressed():
                 self.controller_alignment.start_alignment()
             
             # turn 90 degrees
-            if wpilib.XboxController(2).getBButtonPressed():
+            if wpilib.XboxController(0).getBButtonPressed():
                 self.controller_alignment.interrupt()
 
             wpilib.SmartDashboard.putString("PixyCam Status", "Line Detected" if self.arduino_component.safe_to_detect() else "Line not detected")

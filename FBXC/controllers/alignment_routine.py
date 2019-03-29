@@ -31,8 +31,10 @@ class AlignmentController(StateMachine):
         print("{}, {}".format(p, -p*robotmap.drive_power_side_ratio))
         if p > 0:
             self.drivetrain.teleop_drive_robot(left_speed=p*robotmap.drive_power_side_ratio, right_speed=-p)
-        else:
+        elif p < 0:
             self.drivetrain.teleop_drive_robot(left_speed=p, right_speed=-p*robotmap.drive_power_side_ratio)
+        else:
+            self.drivetrain.teleop_drive_robot(left_speed=0.2, right_speed=-0.2)
         self.line_detect_failsafe_checker()
 
     def start_alignment(self):
