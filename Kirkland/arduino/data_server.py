@@ -1,6 +1,5 @@
 import time
 import serial
-# import arduino.serial_spoofed as serial # NOTE comment this to enable debug spoofing
 import re
 from threading import Thread
 import math
