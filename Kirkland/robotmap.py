@@ -1,5 +1,7 @@
 import math
 
+spoofing_arduino = False
+
 # drivetrain
 # note that front is the motor towards the front, back is back, and top is the one physically above the others
 left_front_drive = 5
@@ -11,6 +13,9 @@ right_bottom_drive = 3
 
 # cargo device
 cargo_motor = 8
+
+# cargo servo
+cargo_servo = 0
 
 
 #solenoids
@@ -65,5 +70,5 @@ drive_pid_power_turn = .5
 gathering_buffer = 1       # take the last x vectors to calculate
 gathering_time = 15          # if the number of failed detections is greater than this, dont use data
 camera_center = 78/2        # center coordinate of camera
-drive_power_constant = .02   # kind of like a P constant in a way, multiplied by center error to get power
-drive_power_side_ratio = .75
+drive_power_constant = .2   # kind of like a P constant in a way, multiplied by center error to get power
+drive_power_side_ratio = .7

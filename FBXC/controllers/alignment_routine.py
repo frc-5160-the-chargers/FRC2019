@@ -29,12 +29,13 @@ class AlignmentController(StateMachine):
     def drive_with_alignment(self, position):
         p = utils.clamp(utils.root(-position*robotmap.drive_power_constant, 3), -.5, .5)
         print("{}, {}".format(p, -p*robotmap.drive_power_side_ratio))
-        if p > 0:
+        tolerance = 3
+        if -position > tolerance:
             self.drivetrain.teleop_drive_robot(left_speed=p*robotmap.drive_power_side_ratio, right_speed=-p)
-        elif p < 0:
+        elif -position < -tolerance:
             self.drivetrain.teleop_drive_robot(left_speed=p, right_speed=-p*robotmap.drive_power_side_ratio)
         else:
-            self.drivetrain.teleop_drive_robot(left_speed=0.2, right_speed=-0.2)
+            self.drivetrain.teleop_drive_robot(left_speed=-0.4, right_speed=-0.4)
         self.line_detect_failsafe_checker()
 
     def start_alignment(self):

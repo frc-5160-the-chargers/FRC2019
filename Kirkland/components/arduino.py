@@ -1,7 +1,9 @@
 from arduino.data_server import ArduinoServer, Vector
-# from arduino.serial_spoofed import ArduinoServer
 
 import robotmap
+
+if robotmap.spoofing_arduino:
+    from arduino.serial_spoofed import ArduinoServer
 
 class ArduinoHandler:
     arduino_server :    ArduinoServer

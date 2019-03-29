@@ -9,14 +9,18 @@ from components.drivetrain import Drivetrain, DriveModes
 from components.pneumatic_assemblies import HatchGrab, HatchRack, Shifters
 from components.cargo_mechanism import CargoMechanism
 from components.arduino import ArduinoHandler
+from components.cargo_servo import CargoServo, CargoServoPosition
 
 from controllers.drivetrain_pid import DriveStraightPID, TurnPID
 from controllers.alignment_routine import AlignmentController
 
 from arduino.data_server import ArduinoServer
-# from arduino.serial_spoofed import ArduinoServer
 
 import robotmap
+
+if robotmap.spoofing_arduino:
+    from arduino.serial_spoofed import ArduinoServer
+
 from motor_configurator import configure_cargo_redline, bulk_config_drivetrain 
 from oi import OI, Side
 
@@ -29,9 +33,8 @@ class MyRobot(magicbot.MagicRobot):
     hatch_grab :        HatchGrab
     gearbox_shifters :  Shifters
     arduino_component : ArduinoHandler
+    cargo_lock :        CargoServo
 
-    controller_drive_straight : DriveStraightPID
-    controller_turn :           TurnPID
     controller_alignment :      AlignmentController
 
     def createObjects(self):
@@ -63,6 +66,8 @@ class MyRobot(magicbot.MagicRobot):
         self.cargo_mechanism_motor = ctre.WPI_TalonSRX(robotmap.cargo_motor)
         configure_cargo_redline(self.cargo_mechanism_motor)
 
+        # cargo mechanism servo
+        self.cargo_servo_rotator = wpilib.Servo(robotmap.cargo_servo)
 
         # PNEUMATICS
         # drawer extenders
@@ -102,14 +107,6 @@ class MyRobot(magicbot.MagicRobot):
         self.drive_forwards_pid.setToleranceBuffer(robotmap.drive_buffer)
         self.turn_pid.setToleranceBuffer(robotmap.turn_buffer)
 
-        # setup smartdashboard for live pid updates
-        self.drive_pid_labels = ["drive_kP", "drive_kI", "drive_kD"]
-        self.turn_pid_labels = ["turn_kP", "turn_kI", "turn_kD"]
-        for i in self.drive_pid_labels:
-            wpilib.SmartDashboard.putNumber(i, 0)
-        for i in self.turn_pid_labels:
-            wpilib.SmartDashboard.putNumber(i, 0)
-
         # launch automatic camera capturing for main drive cam
         wpilib.CameraServer.launch("vision.py:main")
 
@@ -145,6 +142,14 @@ class MyRobot(magicbot.MagicRobot):
             if self.oi.calibrate_pressure_sensor():
                 self.pressure_sensor.calibrate_pressure()
 
+            # BEAST MODE
+            if self.oi.beast_mode():
+                self.oi.beast_mode_active = not self.oi.beast_mode_active
+
+            # handle the cargo mechanism
+            if self.oi.toggle_cargo_lock():
+                self.cargo_lock.toggle_lock()
+
             # operate the hatch mechanism
             # the drawer
             if self.oi.extend_hatch():
@@ -167,6 +172,11 @@ class MyRobot(magicbot.MagicRobot):
             
             if self.oi.stop_alignment():
                 self.controller_alignment.interrupt()
+
+            if self.cargo_lock.current_position == CargoServoPosition.UNLOCKED:
+                self.cargo_mechanism.power = self.oi.process_cargo_control()
+            else:
+                self.cargo_mechanism.power = 0
 
             #display calibrated air pressure in smart dashboard
             wpilib.SmartDashboard.putNumber("Calibrated Pressure", self.pressure_sensor.get_pressure_psi())

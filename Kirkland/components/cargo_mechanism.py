@@ -6,15 +6,14 @@ class CargoMechanism:
     cargo_mechanism_motor : WPI_TalonSRX
     oi : OI
 
-    MINPOWER = -1
-    MAXPOWER = 1
+    MINPOWER = -0.18
+    MAXPOWER = .18
 
     def __init__(self):
-        pass
+        self.power = 0
 
     def execute(self):
         # TODO Thisll probably need to have varying power depending on direction
         # positive power makes the cargo tip inwards
-        power = self.oi.process_cargo_control()
-        power = clamp(power, CargoMechanism.MINPOWER, CargoMechanism.MAXPOWER)
+        power = clamp(-self.power, CargoMechanism.MINPOWER, CargoMechanism.MAXPOWER)
         self.cargo_mechanism_motor.set(power)

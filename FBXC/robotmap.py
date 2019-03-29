@@ -33,5 +33,5 @@ turn_kD = 0
 gathering_buffer = 1       # take the last x vectors to calculate
 gathering_time = 15          # if the number of failed detections is greater than this, dont use data
 camera_center = 78/2        # center coordinate of camera
-drive_power_constant = .02   # kind of like a P constant in a way, multiplied by center error to get power
+drive_power_constant = .04   # kind of like a P constant in a way, multiplied by center error to get power
 drive_power_side_ratio = .75 # proportion of power to supply to other side, higher is more point turny

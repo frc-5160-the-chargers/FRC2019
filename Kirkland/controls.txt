@@ -11,9 +11,9 @@ CONTROLLER 1 (main driver)
     
   
 CONTROLLER 2 (sysop)
-    x               automagically retrieve a hatch with aborting
+    x               
     y               manually toggle rack with grabber
-    a               automagically place a hatch with aborting
+    a               lock the cargo thing in place
     b               manually toggle grab with the hatch grabber
     
     left stick

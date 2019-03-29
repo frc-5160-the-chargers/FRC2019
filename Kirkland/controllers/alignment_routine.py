@@ -28,15 +28,15 @@ class AlignmentController(StateMachine):
         self.done()
 
     def drive_with_alignment(self, position):
-        alignmentMaxSpeed = .3
-        straightTolerance = 1 # withing pixyunits for alignment tolerance
-        p = utils.clamp(utils.root(-position*robotmap.drive_power_constant, 3), -alignmentMaxSpeed, alignmentMaxSpeed) # we take the 3rd root here to curve the power a bit, its like ghetto pid
-        if p > straightTolerance:
+        alignmentMaxSpeed = .75
+        straightTolerance = 3 # withing pixyunits for alignment tolerance
+        p = utils.clamp(utils.root(-position*robotmap.drive_power_constant, 5), -alignmentMaxSpeed, alignmentMaxSpeed) # we take the 3rd root here to curve the power a bit, its like ghetto pid
+        if -position > straightTolerance:
             self.drivetrain.teleop_drive_robot(left_speed=p*robotmap.drive_power_side_ratio, right_speed=-p)
-        elif p < -straightTolerance:
+        elif -position < -straightTolerance:
             self.drivetrain.teleop_drive_robot(left_speed=p, right_speed=-p*robotmap.drive_power_side_ratio)
         else:
-            self.drivetrain.teleop_drive_robot(left_speed=alignmentMaxSpeed/2, right_speed=-alignmentMaxSpeed/2)
+            self.drivetrain.teleop_drive_robot(left_speed=-0.5, right_speed=-0.5)
         self.line_detect_failsafe_checker()
 
     def start_alignment(self):
