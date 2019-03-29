@@ -40,10 +40,12 @@ class OI:
 
             # driver
             "drivetrain_shift" : wpilib.XboxController.Button.kBumperRight,
-            "beast_mode" : wpilib.XboxController.Button.kA,
+            "beast_mode" : wpilib.XboxController.Button.kY,
             "arcade_tank_shift" : wpilib.XboxController.Button.kX,
             "switch_main_camera" : wpilib.XboxController.Button.kB,
-            "driver_override" : wpilib.XboxController.Button.kY
+            "driver_override" : wpilib.XboxController.Button.kY,
+            "alignment_start" : wpilib.XboxController.Button.kA,
+            "alignment_stop" : wpilib.XboxController.Button.kB
         }
 
         with open(OI.SETTINGSFILE, 'w') as outfile:
@@ -142,3 +144,9 @@ class OI:
 
     def driver_override(self):
         return self.get_button_pressed_config(self.driver_joystick, "driver_override")
+    
+    def start_alignment(self):
+        return self.get_button_pressed_config(self.driver_joystick, "alignment_start")
+    
+    def stop_alignment(self):
+        return self.get_button_pressed_config(self.driver_joystick, "alignment_stop")

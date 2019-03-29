@@ -105,12 +105,10 @@ class MyRobot(magicbot.MagicRobot):
         # setup smartdashboard for live pid updates
         self.drive_pid_labels = ["drive_kP", "drive_kI", "drive_kD"]
         self.turn_pid_labels = ["turn_kP", "turn_kI", "turn_kD"]
-        self.alignment_label = "align_kP"
         for i in self.drive_pid_labels:
             wpilib.SmartDashboard.putNumber(i, 0)
         for i in self.turn_pid_labels:
             wpilib.SmartDashboard.putNumber(i, 0)
-        wpilib.SmartDashboard.putNumber(self.alignment_label, robotmap.drive_power_constant)
 
         # launch automatic camera capturing for main drive cam
         wpilib.CameraServer.launch("vision.py:main")
@@ -160,16 +158,15 @@ class MyRobot(magicbot.MagicRobot):
                 # shift the drivetrain
                 self.gearbox_shifters.toggle_shift()
 
-            # this part does the mode switching for driver control
-            if self.oi.beast_mode():
-                self.oi.beast_mode_active = not self.oi.beast_mode_active
-
             if self.oi.arcade_tank_shift():
                 self.oi.arcade_drive = not self.oi.arcade_drive
+
+            # run alignment routine as needed
+            if self.oi.start_alignment():
+                self.controller_alignment.start_alignment()
             
-            # driver override for PID loops
-            if self.oi.driver_override():
-                self.drivetrain.driver_takeover()
+            if self.oi.stop_alignment():
+                self.controller_alignment.interrupt()
 
             #display calibrated air pressure in smart dashboard
             wpilib.SmartDashboard.putNumber("Calibrated Pressure", self.pressure_sensor.get_pressure_psi())
@@ -186,32 +183,6 @@ class MyRobot(magicbot.MagicRobot):
             wpilib.SmartDashboard.putString("Beast mode", "Active" if self.oi.beast_mode_active else "Disabled")
 
             wpilib.SmartDashboard.putString("PixyCam Status", "Line Detected" if self.arduino_component.safe_to_detect() else "Line not detected")
-
-            # read the pid stuff from smartdashboard if button is pressed
-            if wpilib.XboxController(2).getXButtonPressed():
-                def loadLabelsController(pidController, labels):
-                    constants = [wpilib.SmartDashboard.getNumber(i, 0) for i in labels]
-                    pidController.setP(constants[0])
-                    pidController.setI(constants[1])
-                    pidController.setD(constants[2])
-                loadLabelsController(self.drive_forwards_pid, self.drive_pid_labels)
-                loadLabelsController(self.turn_pid, self.turn_pid_labels)
-                self.drivetrain.drive_power_align_constant = wpilib.SmartDashboard.getNumber(self.alignment_label, 0.2)
-
-            # do pid testing routines if button is pressed
-            # drive 36 inches
-            if wpilib.XboxController(2).getAButtonPressed():
-                self.controller_drive_straight.drive_distance(36)
-            
-            # turn 90 degrees
-            if wpilib.XboxController(2).getBButtonPressed():
-                self.controller_turn.turn_distance(90)
-            
-            if wpilib.XboxController(2).getYButtonPressed():
-                self.controller_alignment.start_alignment()
-
-            if wpilib.XboxController(2).getBumperPressed(wpilib.XboxController.Hand.kRight):
-                self.controller_alignment.interrupt()
         except:
             self.onException()
 

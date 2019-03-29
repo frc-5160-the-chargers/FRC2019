@@ -4,9 +4,9 @@ CONTROLLER 1 (main driver)
     left stick      forwards & backwards/tank drive left side
     right stick     turning/tank drive right side
     x               shift from arcade to tank mode and vice versa
-    y               driver override
-    a               ｂｅａｓｔ　ｍｏｄｅ
-    b               switch cameras
+    y               beast mode
+    a               start alignment routine
+    b               stop alignment routine
     right bumper    shift
     
   
