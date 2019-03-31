@@ -16,6 +16,8 @@ from controllers.alignment_routine import AlignmentController
 
 from arduino.data_server import ArduinoServer
 
+import networktables
+
 import robotmap
 
 if robotmap.spoofing_arduino:
@@ -120,9 +122,11 @@ class MyRobot(magicbot.MagicRobot):
         Called when the robot starts; optional
         """
         self.oi.load_user_settings()
+        self.oi.arcade_drive = True
         self.navx_board.reset_rotation()
         self.controller_alignment.stop_reset_drivetrain()
-
+        self.currentCam = 0
+        self.table = networktables.NetworkTables.getTable("/CameraPublisher")
 
     def teleopPeriodic(self):
         """
@@ -130,7 +134,6 @@ class MyRobot(magicbot.MagicRobot):
         """
         # TODO Individual try catches
         try:
-            print(self.arduino_component.average_line_position)
             # set drivetrain power
             if self.drivetrain.current_mode == DriveModes.DRIVEROPERATED:
                 if self.oi.arcade_drive:
@@ -163,15 +166,15 @@ class MyRobot(magicbot.MagicRobot):
                 # shift the drivetrain
                 self.gearbox_shifters.toggle_shift()
 
-            if self.oi.arcade_tank_shift():
-                self.oi.arcade_drive = not self.oi.arcade_drive
+            # if self.oi.arcade_tank_shift():
+            #     self.oi.arcade_drive = not self.oi.arcade_drive
 
             # run alignment routine as needed
-            if self.oi.start_alignment():
-                self.controller_alignment.start_alignment()
+            # if self.oi.start_alignment():
+            #     self.controller_alignment.start_alignment()
             
-            if self.oi.stop_alignment():
-                self.controller_alignment.interrupt()
+            # if self.oi.stop_alignment():
+            #     self.controller_alignment.interrupt()
 
             if self.cargo_lock.current_position == CargoServoPosition.UNLOCKED:
                 self.cargo_mechanism.power = self.oi.process_cargo_control()
@@ -189,10 +192,15 @@ class MyRobot(magicbot.MagicRobot):
             wpilib.SmartDashboard.putString("hatch grabber status", "Latched" if self.hatch_grab.latched else "Not Latched")
             wpilib.SmartDashboard.putString("hatch rack status", "Extended" if self.hatch_rack.extended else "Retracted")
 
-            wpilib.SmartDashboard.putString("Tank drive", "Active" if self.drivetrain.current_mode != self.oi.arcade_drive else "Disabled")
+            # wpilib.SmartDashboard.putString("Tank drive", "Active" if self.drivetrain.current_mode != self.oi.arcade_drive else "Disabled")
             wpilib.SmartDashboard.putString("Beast mode", "Active" if self.oi.beast_mode_active else "Disabled")
 
             wpilib.SmartDashboard.putString("PixyCam Status", "Line Detected" if self.arduino_component.safe_to_detect() else "Line not detected")
+
+            if self.oi.switch_cameras():
+                self.currentCam = 0 if self.currentCam == 1 else 1
+
+            self.table.putString("selected", "{}".format(self.currentCam))
         except:
             self.onException()
 

@@ -3,6 +3,7 @@ from components.navx import NavX
 from components.drivetrain import Drivetrain, DriveModes
 from components.pneumatic_assemblies import HatchGrab, HatchRack, Shifters
 from components.pressure_sensor import AnalogPressureSensor
+from components.cargo_servo import CargoServo, CargoServoPosition
 
 from oi import OI, Side
 
@@ -19,9 +20,9 @@ class MainAutonomous:
     hatch_rack :        HatchRack
     hatch_grab :        HatchGrab
     gearbox_shifters :  Shifters
-    oi :                OI
-    pressure_sensor :   AnalogPressureSensor
+    cargo_lock :        CargoServo
 
+    oi : OI
 
     def on_enable(self):
         """
@@ -29,7 +30,10 @@ class MainAutonomous:
         """
         self.oi.load_user_settings()
         self.navx_board.reset_rotation()
-        
+        self.drivetrain.reset_input()
+        self.drivetrain.current_mode = DriveModes.DRIVEROPERATED
+        self.oi.arcade_drive = True
+
     def on_disable(self):
         pass
     
@@ -41,14 +45,19 @@ class MainAutonomous:
         # TODO Individual try catches
         try:
             # set drivetrain power
-            if self.oi.arcade_drive:
-                self.drivetrain.teleop_drive_robot(speed=self.oi.process_driver_input(Side.LEFT), rotation=self.oi.process_driver_input(Side.RIGHT))
-            else:
-                self.drivetrain.teleop_drive_robot(left_speed=self.oi.process_driver_input(Side.LEFT), right_speed=self.oi.process_driver_input(Side.RIGHT))
+            if self.drivetrain.current_mode == DriveModes.DRIVEROPERATED:
+                if self.oi.arcade_drive:
+                    self.drivetrain.teleop_drive_robot(speed=self.oi.process_driver_input(Side.LEFT), rotation=self.oi.process_driver_input(Side.RIGHT))
+                else:
+                    self.drivetrain.teleop_drive_robot(left_speed=self.oi.process_driver_input(Side.LEFT), right_speed=self.oi.process_driver_input(Side.RIGHT))
 
-            #calibrate the analog pressure sensor
-            if self.oi.calibrate_pressure_sensor():
-                self.pressure_sensor.calibrate_pressure()
+            # BEAST MODE
+            if self.oi.beast_mode():
+                self.oi.beast_mode_active = not self.oi.beast_mode_active
+
+            # handle the cargo mechanism
+            if self.oi.toggle_cargo_lock():
+                self.cargo_lock.toggle_lock()
 
             # operate the hatch mechanism
             # the drawer
@@ -63,23 +72,13 @@ class MainAutonomous:
                 # shift the drivetrain
                 self.gearbox_shifters.toggle_shift()
 
-            # this part does the mode switching for driver control
-            if self.oi.beast_mode():
-                self.oi.beast_mode_active = not self.oi.beast_mode_active
+            # if self.oi.arcade_tank_shift():
+            #     self.oi.arcade_drive = not self.oi.arcade_drive
 
-            if self.oi.arcade_tank_shift():
-                self.oi.arcade_drive = not self.oi.arcade_drive
-            
-            # driver override for PID loops
-            if self.oi.driver_override():
-                self.drivetrain.driver_takeover()
-
-            #display calibrated air pressure in smart dashboard
-            wpilib.SmartDashboard.putNumber("Calibrated Pressure", self.pressure_sensor.get_pressure_psi())
-            
-            # calibrate if needed
-            if self.oi.calibrate_pressure_sensor():
-                self.pressure_sensor.calibrate_pressure()
+            if self.cargo_lock.current_position == CargoServoPosition.UNLOCKED:
+                self.cargo_mechanism.power = self.oi.process_cargo_control()
+            else:
+                self.cargo_mechanism.power = 0
 
             # booleans to indicate grabber status
             wpilib.SmartDashboard.putString("hatch grabber status", "Latched" if self.hatch_grab.latched else "Not Latched")
@@ -87,5 +86,6 @@ class MainAutonomous:
 
             wpilib.SmartDashboard.putString("Tank drive", "Active" if self.drivetrain.current_mode != self.oi.arcade_drive else "Disabled")
             wpilib.SmartDashboard.putString("Beast mode", "Active" if self.oi.beast_mode_active else "Disabled")
+
         except:
             pass

@@ -4,6 +4,8 @@ from ctre import WPI_TalonSRX
 from wpilib import SpeedControllerGroup
 from wpilib.drive import DifferentialDrive
 
+from motor_configurator import bulk_config_drivetrain_coast
+
 import robotmap
 
 from oi import OI, Side
@@ -38,6 +40,9 @@ class Drivetrain:
         self.rotation = 0
 
         self.current_mode = DriveModes.DRIVEROPERATED
+
+    def set_coast_motors(self):
+        bulk_config_drivetrain_coast(self.right_back_motor, self.right_front_motor, self.right_top_motor, self.left_back_motor, self.left_top_motor, self.left_front_motor)
 
     def teleop_drive_robot(self, left_speed=0, right_speed=0, speed=0, rotation=0):
         self.left_speed = left_speed

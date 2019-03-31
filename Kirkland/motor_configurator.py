@@ -21,9 +21,15 @@ def configure_drivetrain_cim(motor: ctre.WPI_TalonSRX):
     motor.configOpenLoopRamp(0.3)
     motor.clearStickyFaults()
     motor.enableCurrentLimit(True)
-    motor.configContinuousCurrentLimit(70)
+    motor.configContinuousCurrentLimit(30)
     motor.configPeakCurrentLimit(0)
     motor.setNeutralMode(ctre.NeutralMode.Brake)
+
+def configure_motor_coast(motor : ctre.WPI_TalonSRX):
+    """
+    make a motor set to coast
+    """
+    motor.setNeutralMode(ctre.NeutralMode.Coast)
 
 def bulk_config_drivetrain(*args):
     """
@@ -32,3 +38,10 @@ def bulk_config_drivetrain(*args):
     """
     for _, motor in enumerate(args):
         configure_drivetrain_cim(motor)
+
+def bulk_config_drivetrain_coast(*args):
+    """
+    set all motors to coast
+    """
+    for _, motor in enumerate(args):
+        configure_motor_coast(motor)
