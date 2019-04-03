@@ -7,7 +7,7 @@ class CargoMechanism:
     oi : OI
 
     POWERIN = -0.25
-    POWEROUT = 0.18
+    POWEROUT = 0.2
 
     def __init__(self):
         self.power = 0

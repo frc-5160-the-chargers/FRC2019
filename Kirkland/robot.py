@@ -179,7 +179,8 @@ class MyRobot(magicbot.MagicRobot):
             if self.cargo_lock.current_position == CargoServoPosition.UNLOCKED:
                 self.cargo_mechanism.power = self.oi.process_cargo_control()
             else:
-                self.cargo_mechanism.power = 0
+                p = self.oi.process_cargo_control() if self.oi.process_cargo_control() < 0 else 0
+                self.cargo_mechanism.power = -0.1 + p
 
             #display calibrated air pressure in smart dashboard
             wpilib.SmartDashboard.putNumber("Calibrated Pressure", self.pressure_sensor.get_pressure_psi())
