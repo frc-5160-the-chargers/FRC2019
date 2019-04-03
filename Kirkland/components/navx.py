@@ -1,10 +1,10 @@
 from navx import AHRS
 
-class NavXHandler:
+class NavX:
     navx : AHRS
 
     def __init__(self):
-        self.last_rotation = 0# self.get_rotation()
+        self.last_rotation = 0
 
     def get_rotation(self):
         return self.navx.getAngle()

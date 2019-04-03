@@ -4,16 +4,16 @@ CONTROLLER 1 (main driver)
     left stick      forwards & backwards/tank drive left side
     right stick     turning/tank drive right side
     x               shift from arcade to tank mode and vice versa
-    y               also shift if you are a heretic
-    a               ｂｅａｓｔ　ｍｏｄｅ
-    b               switch cameras
+    y               beast mode
+    a               start alignment routine
+    b               stop alignment routine
     right bumper    shift
     
   
 CONTROLLER 2 (sysop)
-    x               automagically retrieve a hatch with aborting
+    x               
     y               manually toggle rack with grabber
-    a               automagically place a hatch with aborting
+    a               lock the cargo thing in place
     b               manually toggle grab with the hatch grabber
     
     left stick
@@ -21,8 +21,8 @@ CONTROLLER 2 (sysop)
     stick
 
 
-CONTROLLER 3 (programmer override stuff)
-    x               turn 90 degrees
-    y               drive 3 feet
-    a               update pid constants
-    b               driver takeover stuff
+CONTROLLER 3 (testing utils)
+    x               load in pid settings from smartdashboard
+    y               test alignment routine
+    a               drive 36 inches
+    b               turn 90 degrees

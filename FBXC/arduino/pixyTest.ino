@@ -10,7 +10,7 @@ void setup() {
     // set up pixycam
     pixy.init();
     pixy.changeProg("line");
-    pixy.setLamp(1, 0);
+    // pixy.setLamp(1, 0);
 }
 
 void loop() {

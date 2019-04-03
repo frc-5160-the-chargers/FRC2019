@@ -6,20 +6,31 @@ import wpilib.drive
 
 import ctre
 
+from components.arduino import ArduinoHandler
+
+from arduino.data_server import ArduinoServer
+
 import robotmap
 import OI
 from OI import Side
 
 from motorConfigurator import MotorConfigurator
 
-from components.drivetrain import Drivetrain
+from components.drivetrain import Drivetrain, DriveModes
+
+from controllers.alignment_routine import AlignmentController
 
 class MyRobot(magicbot.MagicRobot):
 
     # High level components - list these first
+    controller_alignment :      AlignmentController
+
+
 
     # Low level components
     drivetrain : Drivetrain
+    arduino_component : ArduinoHandler
+
 
     def createObjects(self):
         """
@@ -57,11 +68,11 @@ class MyRobot(magicbot.MagicRobot):
 
         # launch automatic camera capturing for main drive cam
         # TODO Mount camera
-        # wpilib.CameraServer.launch()
+        wpilib.CameraServer.launch()
 
-        # PID tuning params on smartdashboard
-        wpilib.SmartDashboard.putNumberArray("DriveForwardsPID", [0.2, 0, 0])
-        wpilib.SmartDashboard.putNumberArray("TurnPID", [1, 0, 0])
+        # launch arduino code and start data server
+        self.arduino_server = ArduinoServer()
+        self.arduino_server.startServer()
 
 
     def teleopInit(self):
@@ -70,10 +81,13 @@ class MyRobot(magicbot.MagicRobot):
         """
         self.gyro.reset()
         self.drivetrain.reset_encoders()
+        self.oi.load_user_settings()
+
+        self.controller_alignment.stop_reset_drivetrain()
+
 
         # self.drivetrain.pid.set_setpoint_reset(self.drivetrain.TICKS_PER_INCH*12)
         # self.drivetrain.turn_to_position(90, timeout=5)
-
 
     def teleopPeriodic(self):
         """
@@ -81,41 +95,25 @@ class MyRobot(magicbot.MagicRobot):
         """
         try:
             # handle the drivetrain
-            if self.oi.twoStickMode:
-                self.drivetrain.teleop_drive_robot(self.oi.twoStickMode, self.oi.process_driver_input(Side.LEFT), self.oi.process_driver_input(Side.RIGHT), square_inputs=True)
-            else:
-                self.drivetrain.teleop_drive_robot(self.oi.twoStickMode, self.oi.process_driver_input(Side.LEFT), self.oi.process_driver_input(Side.RIGHT), square_inputs=True)
+            if self.drivetrain.current_mode == DriveModes.DRIVEROPERATED:
+                if self.oi.arcade_drive:
+                    self.drivetrain.teleop_drive_robot(speed=self.oi.process_driver_input(Side.LEFT), rotation=self.oi.process_driver_input(Side.RIGHT))
+                else:
+                    self.drivetrain.teleop_drive_robot(left_speed=self.oi.process_driver_input(Side.LEFT), right_speed=self.oi.process_driver_input(Side.RIGHT))
 
-            # this part does the mode switching for driver control
-            # TODO: move into OI
+            if self.oi.arcade_tank_shift():
+                self.oi.arcade_drive = not self.oi.arcade_drive
+            
+            # do pid testing routines if button is pressed
+            # drive 36 inches
             if wpilib.XboxController(0).getAButtonPressed():
-                self.oi.beastMode = not self.oi.beastMode
-            if wpilib.XboxController(0).getXButtonPressed():
-                self.oi.twoStickMode = not self.oi.twoStickMode
-                self.drivetrain.driver_takeover()
-
-            # PID Testing is on the third controller
-            # a: drive 3 feet
-            # b: turn 90 degrees
-            # x: read distance pid values
-            # y: read turn pid values
-            if wpilib.XboxController(2).getAButtonPressed():
-                self.drivetrain.start_drive_to_position(12*3, timeout=20, tolerance=0.1, timeStable=3) # drive 3 feet or something
+                self.controller_alignment.start_alignment()
             
-            if wpilib.XboxController(2).getBButtonPressed():
-                self.drivetrain.start_turn_to_position(90) # turn 90 degrees
-            
-            if wpilib.XboxController(2).getXButtonPressed():
-                self.drivetrain.drivePid.kP, self.drivetrain.drivePid.kI, self.drivetrain.drivePid.kD = wpilib.SmartDashboard.getNumberArray("DriveForwardsPID", [0, 0, 0])
+            # turn 90 degrees
+            if wpilib.XboxController(0).getBButtonPressed():
+                self.controller_alignment.interrupt()
 
-            if wpilib.XboxController(2).getYButtonPressed():
-                self.drivetrain.turnPid.kP, self.drivetrain.turnPid.kI, self.drivetrain.turnPid.kD = wpilib.SmartDashboard.getNumberArray("TurnPID", [0,0,0])
-
-            if wpilib.XboxController(2).getBumperPressed(wpilib.XboxController.Hand.kRight):
-                self.drivetrain.driver_takeover()
-
-            print(self.gyro.getAngle())
-
+            wpilib.SmartDashboard.putString("PixyCam Status", "Line Detected" if self.arduino_component.safe_to_detect() else "Line not detected")
         except:
             self.onException()
 

@@ -33,17 +33,18 @@ class OI:
             # sysop
             "hatch_grab" : wpilib.XboxController.Button.kB,
             "hatch_extend" : wpilib.XboxController.Button.kY,
-            "hatch_autoretrieve" : wpilib.XboxController.Button.kX,
-            "hatch_autoplace" : wpilib.XboxController.Button.kA,
+            "cargo_lock_toggle" : wpilib.XboxController.Button.kA,
             "calibrate_pressure_1" : wpilib.XboxController.Button.kStickLeft,
             "calibrate_pressure_2" : wpilib.XboxController.Button.kStickRight,
 
             # driver
             "drivetrain_shift" : wpilib.XboxController.Button.kBumperRight,
-            "beast_mode" : wpilib.XboxController.Button.kA,
+            "beast_mode" : wpilib.XboxController.Button.kY,
             "arcade_tank_shift" : wpilib.XboxController.Button.kX,
             "switch_main_camera" : wpilib.XboxController.Button.kB,
-            "driver_override" : wpilib.XboxController.Button.kY
+            "driver_override" : wpilib.XboxController.Button.kY,
+            "alignment_start" : wpilib.XboxController.Button.kA,
+            "alignment_stop" : wpilib.XboxController.Button.kB
         }
 
         with open(OI.SETTINGSFILE, 'w') as outfile:
@@ -87,22 +88,24 @@ class OI:
     
     def process_driver_input(self, robot_side):
         """handle driver input depending on the side passed in"""
-        left_stick = 1
-        right_stick = 5
-        right_stick_x = 4
+        left_stick = 1 if not self.beast_mode_active else 5
+        right_stick = 5 if not self.beast_mode_active else 1
+        right_stick_x = 4 
 
-        turn_speed_modifier = 1.7       # yes this is that parameter that will need to be tuned every match because picky drivers
+        bm = 1 if not self.beast_mode_active else -1
+
+        turn_speed_modifier = 1.6       # yes this is that parameter that will need to be tuned every match because picky drivers
 
         if not self.arcade_drive:       # tank drive
             if robot_side == Side.LEFT:
-                return self.process_input(self.driver_joystick.getRawAxis(left_stick))
+                return self.process_input(self.driver_joystick.getRawAxis(left_stick))*bm
             elif robot_side == Side.RIGHT:
-                return self.process_input(self.driver_joystick.getRawAxis(right_stick))
+                return self.process_input(self.driver_joystick.getRawAxis(right_stick))*bm
         else:                           # arcade drive
             if robot_side == Side.LEFT:
-                return self.process_input(self.driver_joystick.getRawAxis(left_stick))
+                return self.process_input(self.driver_joystick.getRawAxis(left_stick))*bm
             elif robot_side == Side.RIGHT:
-                return -self.driver_joystick.getRawAxis(right_stick_x)/turn_speed_modifier
+                return -self.driver_joystick.getRawAxis(right_stick_x)/turn_speed_modifier*bm
     
 
     # functions for checking individual buttons
@@ -125,12 +128,6 @@ class OI:
     def extend_hatch(self):
         return self.get_button_pressed_config(self.sysop_joystick, "hatch_extend")
         
-    def auto_retrieve_hatch(self):
-        return self.get_button_pressed_config(self.sysop_joystick, "hatch_autoretrieve")
-        
-    def auto_place_hatch(self):
-        return self.get_button_pressed_config(self.sysop_joystick, "hatch_autoplace")
-
     def shift_drivetrain(self):
         return self.get_button_pressed_config(self.driver_joystick, "drivetrain_shift")
 
@@ -142,3 +139,12 @@ class OI:
 
     def driver_override(self):
         return self.get_button_pressed_config(self.driver_joystick, "driver_override")
+    
+    def start_alignment(self):
+        return self.get_button_pressed_config(self.driver_joystick, "alignment_start")
+    
+    def stop_alignment(self):
+        return self.get_button_pressed_config(self.driver_joystick, "alignment_stop")
+
+    def toggle_cargo_lock(self):
+        return self.get_button_pressed_config(self.sysop_joystick, "cargo_lock_toggle")
