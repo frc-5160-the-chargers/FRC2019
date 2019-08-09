@@ -58,3 +58,13 @@ class Tuning:
 
     class Limits:
         drivetrain_power_limit = .5
+
+class Cameras:
+    cargo_name = "cargo camera"
+    cargo_dev_address = "/dev/v4l/by-path/platform-ci_hdrc.0-usb-0:1.2.2:1.0-video-index0"
+
+    hatch_name = "hatch camera"
+    hatch_dev_address = "/dev/v4l/by-path/platform-ci_hdrc.0-usb-0:1.2.3:1.0-video-index0"
+
+    front_name = "front camera"
+    front_dev_address = "/dev/v4l/by-path/platform-ci_hdrc.0-usb-0:1.2.4:1.0-video-index0"
