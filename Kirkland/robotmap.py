@@ -1,3 +1,7 @@
+# robotmap.py
+# pretty much all of the robot configuration
+# note the class structure, this makes it easier to access things without having really long and confusing variable names
+
 class Ports:
     class Drivetrain:
         class Motors:
@@ -53,11 +57,17 @@ class Physics:
             ticks_per_inch = ticks_per_output_rotation / Wheels.circumference
 
 class Tuning:
-    class PID:
-        pass
+    class Drivetrain:
+        motor_power_percentage_limit = .5
+    
+    class CargoMechanism:
+        class Rotator:
+            lifting_power_limit = .25
+            lowering_power_limit = .2
 
-    class Limits:
-        drivetrain_power_limit = .5
+        class Servo:
+            locked_position = 180
+            unlocked_position = 0
 
 class Cameras:
     cargo_name = "cargo camera"

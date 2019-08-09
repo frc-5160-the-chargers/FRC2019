@@ -1,3 +1,6 @@
+# camera_streaming.py
+# code to run all the vision, but specifically just camera streaming
+
 # camera switching borrowed from:
 # https://github.com/robotpy/robotpy-cscore/blob/master/examples/switched_cameraserver.py
 
