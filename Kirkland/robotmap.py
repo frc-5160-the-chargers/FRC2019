@@ -65,6 +65,9 @@ class Tuning:
     class Drivetrain:
         motor_power_percentage_limit = .5
 
+        min_shifting_speed = 5
+        shifting_speed_enabled = False
+
         class Shifters:
             low_gear_state = DoubleSolenoid.Value.kForward
             high_gear_state = DoubleSolenoid.Value.kReverse
