@@ -65,6 +65,10 @@ class Tuning:
     class Drivetrain:
         motor_power_percentage_limit = .5
 
+        class Shifters:
+            low_gear_state = DoubleSolenoid.Value.kForward
+            high_gear_state = DoubleSolenoid.Value.kReverse
+
     class CargoMechanism:
         class Rotator:
             lifting_power_limit = .25
