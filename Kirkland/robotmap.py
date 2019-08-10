@@ -59,6 +59,9 @@ class Physics:
 
             ticks_per_output_rotation = ticks_per_rotation * output_shaft_ratio
             ticks_per_inch = ticks_per_output_rotation / Wheels.circumference
+    
+    class PressureSensor:
+        calibration_pressure = 112
 
 
 class Tuning:
