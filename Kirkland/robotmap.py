@@ -2,6 +2,9 @@
 # pretty much all of the robot configuration
 # note the class structure, this makes it easier to access things without having really long and confusing variable names
 
+from wpilib import DoubleSolenoid
+
+
 class Ports:
     class Drivetrain:
         class Motors:
@@ -21,7 +24,7 @@ class Ports:
 
             right_front = 3
             right_back = 2
-    
+
     class Cargo:
         rotator = 8
 
@@ -36,30 +39,32 @@ class Ports:
 
             right_front = 6
             right_back = 7
-        
+
         class Grabber:
             pcm = 1
-            
+
             front = 1
             back = 0
-    
+
+
 class Physics:
     class Drivetrain:
         class Wheels:
-            diameter = 6 # inches
+            diameter = 6  # inches
             circumference = diameter * 3.14
-        
+
         class Encoders:
-            ticks_per_rotation = 4096 # talon srx default
+            ticks_per_rotation = 4096  # talon srx default
             output_shaft_ratio = 7.5  # for every 7.5 encoder rotations, the output shaft turns once
-            
+
             ticks_per_output_rotation = ticks_per_rotation * output_shaft_ratio
             ticks_per_inch = ticks_per_output_rotation / Wheels.circumference
+
 
 class Tuning:
     class Drivetrain:
         motor_power_percentage_limit = .5
-    
+
     class CargoMechanism:
         class Rotator:
             lifting_power_limit = .25
@@ -68,6 +73,16 @@ class Tuning:
         class Servo:
             locked_position = 180
             unlocked_position = 0
+
+    class HatchMechanism:
+        class Grabber:
+            grabbing_state = DoubleSolenoid.Value.kReverse
+            released_state = DoubleSolenoid.Value.kForward
+
+        class Rack:
+            extended_state = DoubleSolenoid.Value.kForward
+            retracted_state = DoubleSolenoid.Value.kReverse
+
 
 class Cameras:
     cargo_name = "cargo camera"
