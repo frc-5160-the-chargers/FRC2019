@@ -1,6 +1,6 @@
 from wpilib import AnalogInput
 
-from Kirkland import robotmap
+import robotmap
 
 
 class PressureSensor:

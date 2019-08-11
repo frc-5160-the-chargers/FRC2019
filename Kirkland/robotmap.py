@@ -3,7 +3,7 @@
 # note the class structure, this makes it easier to access things without having really long and confusing variable names
 
 from wpilib import DoubleSolenoid
-
+from ctre import NeutralMode
 
 class Ports:
     class Drivetrain:
@@ -45,20 +45,21 @@ class Ports:
 
             front = 1
             back = 0
+    
+    class PressureSensor:
+        port = 1
 
 
 class Physics:
     class Drivetrain:
-        class Wheels:
-            diameter = 6  # inches
-            circumference = diameter * 3.14
+        diameter = 6  # inches
+        circumference = diameter * 3.14
 
-        class Encoders:
-            ticks_per_rotation = 4096  # talon srx default
-            output_shaft_ratio = 7.5  # for every 7.5 encoder rotations, the output shaft turns once
+        ticks_per_rotation = 4096  # talon srx default
+        output_shaft_ratio = 7.5  # for every 7.5 encoder rotations, the output shaft turns once
 
-            ticks_per_output_rotation = ticks_per_rotation * output_shaft_ratio
-            ticks_per_inch = ticks_per_output_rotation / Wheels.circumference
+        ticks_per_output_rotation = ticks_per_rotation * output_shaft_ratio
+        ticks_per_inch = ticks_per_output_rotation / circumference
     
     class PressureSensor:
         calibration_pressure = 112
@@ -103,3 +104,12 @@ class Cameras:
 
     front_name = "front camera"
     front_dev_address = "/dev/v4l/by-path/platform-ci_hdrc.0-usb-0:1.2.4:1.0-video-index0"
+
+class MotorConfiguration:
+    class Drivetrain:
+        peak_current = 30
+        peak_current_duration = 5
+        neutral_mode = NeutralMode.Coast
+        ramp_rate = 0.3
+    class Cargo:
+        pass

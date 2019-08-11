@@ -5,7 +5,7 @@ from wpilib import DoubleSolenoid
 
 import enum
 
-from Kirkland import robotmap
+import robotmap
 
 
 class HatchGrabberPositions(enum.Enum):
@@ -107,3 +107,8 @@ class HatchMechanism:
 
     def execute(self):
         pass
+
+    def reset(self):
+        self.state = HatchMechanismState.RETRACTED_GRABBING
+        self.hatch_grabber.grab()
+        self.hatch_rack.retract()

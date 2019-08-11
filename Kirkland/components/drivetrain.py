@@ -5,10 +5,10 @@ from ctre import WPI_TalonSRX
 from wpilib import SpeedControllerGroup, DoubleSolenoid
 from wpilib.drive import DifferentialDrive
 
-from Kirkland import robotmap
+import robotmap
+import utils
 
 import enum
-import utils
 
 
 class ShifterGear(enum.Enum):
@@ -61,8 +61,8 @@ class Drivetrain:
     drivetrain_left_back: WPI_TalonSRX
     drivetrain_left_top: WPI_TalonSRX
 
-    drivetrain_left_motors: SpeedControllerGroup
     drivetrain_right_motors: SpeedControllerGroup
+    drivetrain_left_motors: SpeedControllerGroup
 
     differential_drive: DifferentialDrive
 
@@ -96,14 +96,14 @@ class Drivetrain:
 
     def get_left_position(self):
         # NOTE: left_front is the one with the left encoder
-        return -self.drivetrain_left_front.getQuadraturePosition() / robotmap.Physics.Drivetrain.Encoders.ticks_per_inch
+        return -self.drivetrain_left_front.getQuadraturePosition() / robotmap.Physics.Drivetrain.ticks_per_inch
 
     def get_left_velocity(self):
         return -self.drivetrain_left_front.getQuadratureVelocity()
 
     def get_right_position(self):
         # NOTE: right_front has the right encoder
-        return self.drivetrain_right_top.getQuadraturePosition() / robotmap.Physics.Drivetrain.Encoders.ticks_per_inch
+        return self.drivetrain_right_top.getQuadraturePosition() / robotmap.Physics.Drivetrain.ticks_per_inch
 
     def get_right_velocity(self):
         return self.drivetrain_right_top.getQuadratureVelocity()
@@ -149,3 +149,8 @@ class DrivetrainMechanism:
 
     def execute(self):
         pass
+
+    def reset(self):
+        self.drivetrain.drive_mode = DriveModes.ARCADEDRIVE
+        self.drivetrain.stop_motors()
+        self.shifters.shift_down()

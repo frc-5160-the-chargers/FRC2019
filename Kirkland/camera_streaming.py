@@ -6,7 +6,7 @@
 
 from cscore import CameraServer, UsbCamera
 import networktables
-from Kirkland import robotmap
+import robotmap
 
 
 def main():

@@ -4,10 +4,10 @@
 from ctre import WPI_TalonSRX
 from wpilib import Servo
 
-from utils import clamp
 import enum
 
-from Kirkland import robotmap
+import robotmap
+from utils import clamp
 
 
 class CargoRotator:
@@ -76,21 +76,25 @@ class CargoMechanism:
         pass
 
     def toggle_lock(self):
-        self.locking_servo.toggle_lock()
-        if self.locking_servo.get_locked():
-            self.rotator.disable()
+        self.cargo_locking_servo.toggle_lock()
+        if self.cargo_locking_servo.get_locked():
+            self.cargo_rotator.disable()
         else:
-            self.rotator.enable()
+            self.cargo_rotator.enable()
 
     def raise_lift(self, power):
-        if self.locking_servo.get_locked():
+        if self.cargo_locking_servo.get_locked():
             return
-        self.rotator.raise_bucket(power)
+        self.cargo_rotator.raise_bucket(power)
 
     def lower_lift(self, power):
-        if self.locking_servo.get_locked():
+        if self.cargo_locking_servo.get_locked():
             return
-        self.rotator.lower_bucket(power)
+        self.cargo_rotator.lower_bucket(power)
 
     def execute(self):
         pass
+
+    def reset(self):
+        self.cargo_locking_servo.lock()
+        self.cargo_rotator.disable()

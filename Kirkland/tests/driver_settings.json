@@ -1,0 +1,10 @@
+{
+    "shift_drivetrain": 6,
+    "drive_mode_switch": 3,
+    "camera_switch": 2,
+    "hatch_grabber": 2,
+    "hatch_rack": 4,
+    "cargo_lock": 5,
+    "calibrate_pressure": 9,
+    "driver_deadzone": 0.1
+}

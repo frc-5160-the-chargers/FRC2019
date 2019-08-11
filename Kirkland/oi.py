@@ -27,7 +27,7 @@ class OI:
 
     def write_settings(self):
         with open(driver_setting_file, 'w') as f:
-            json.dump(self.settings)
+            json.dump(self.settings, f)
 
     def reset_settings(self):
         default_settings = {
