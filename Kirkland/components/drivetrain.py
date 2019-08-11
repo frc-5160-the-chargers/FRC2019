@@ -77,13 +77,19 @@ class Drivetrain:
 
     def arcade_drive(self, power, rotation):
         self.drive_mode = DriveModes.ARCADEDRIVE
-        self.speed = power
+        self.speed = utils.clamp(power, -robotmap.Tuning.Drivetrain.motor_power_percentage_limit,
+                                 robotmap.Tuning.Drivetrain.motor_power_percentage_limit)
         self.rotation = rotation
 
     def tank_drive(self, left_power, right_power):
         self.drive_mode = DriveModes.TANKDRIVE
-        self.left_power = left_power
-        self.right_power = right_power
+        self.left_power = utils.clamp(left_power, -robotmap.Tuning.Drivetrain.motor_power_percentage_limit,
+                                      robotmap.Tuning.Drivetrain.motor_power_percentage_limit)
+        self.right_power = utils.clamp(right_power, -robotmap.Tuning.Drivetrain.motor_power_percentage_limit,
+                                       robotmap.Tuning.Drivetrain.motor_power_percentage_limit)
+
+    def toggle_mode(self):
+        self.drive_mode = DriveModes.TANKDRIVE if self.drive_mode == DriveModes.ARCADEDRIVE else DriveModes.ARCADEDRIVE
 
     def stop_motors(self):
         self.left_power = 0
@@ -146,6 +152,12 @@ class DrivetrainMechanism:
                 self.shifters.shift_down()
         else:
             self.shifters.shift_down()
+
+    def toggle_shift(self):
+        if self.shifters.gear == ShifterGear.HIGH_GEAR:
+            self.shift_down()
+        else:
+            self.shift_up()
 
     def execute(self):
         pass

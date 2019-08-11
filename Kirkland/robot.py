@@ -3,6 +3,7 @@
 
 import magicbot
 import wpilib
+from wpilib import SmartDashboard as dash
 import ctre
 
 import networktables
@@ -92,7 +93,8 @@ class Robot(magicbot.MagicRobot):
         # run camera streaming program
         wpilib.CameraServer.launch("camera_streaming.py:main")
         self.current_camera = 0
-        self.camera_table = networktables.NetworkTables.getTable("/CameraPublisher")
+        self.camera_table = networktables.NetworkTables.getTable(
+            "/CameraPublisher")
 
         # this is important for this year...
         self.use_teleop_in_autonomous = True
@@ -104,7 +106,51 @@ class Robot(magicbot.MagicRobot):
 
     def teleopPeriodic(self):
         with self.consumeExceptions():
-            pass
-        
+            # DRIVETRAIN
+            if self.drivetrain.drive_mode == DriveModes.ARCADEDRIVE:
+                self.drivetrain.arcade_drive(self.oi.drivetrain_curve(self.oi.driver.getY(
+                    self.oi.driver.Hand.kRight)), self.oi.driver.getX(self.oi.driver.Hand.kRight))
+            elif self.drivetrain.drive_mode == DriveModes.TANKDRIVE:
+                self.drivetrain.tank_drive(self.oi.drivetrain_curve(self.oi.driver.getY(
+                    self.oi.driver.Hand.kLeft)), self.oi.drivetrain_curve(self.oi.driver.getY(self.oi.driver.Hand.kRight)))
+
+            if self.oi.get_drivetrain_shift():
+                self.drivetrain_mechanism.toggle_shift()
+
+            if self.oi.get_drive_mode_switch():
+                self.drivetrain.toggle_mode()
+
+            # HATCHES
+            if self.oi.get_hatch_grabber():
+                self.hatch_mechanism.toggle_grab()
+
+            if self.oi.get_hatch_rack():
+                self.hatch_mechanism.toggle_extended()
+
+            # CARGO
+            cargo_power = self.oi.process_deadzone(self.oi.sysop.getY(self.oi.sysop.Hand.kLeft), robotmap.Tuning.CargoMechanism.deadzone)
+            if cargo_power > 0:
+                self.cargo_mechanism.raise_lift(cargo_power)
+            if cargo_power < 0:
+                self.cargo_mechanism.lower_lift(-cargo_power)
+
+            if self.oi.get_cargo_lock():
+                self.cargo_mechanism.toggle_lock()
+
+            # SENSORS
+            if self.oi.get_camera_switch():
+                self.current_camera = 0 if self.current_camera == 1 else 1
+
+            if self.oi.get_calibrate_pressure():
+                self.pressure_sensor.calibrate_pressure()
+
+            # SMARTDASHBOARD
+            dash.putNumber("Calibrated Pressure: ", self.pressure_sensor.get_pressure())
+            dash.putString("Grabber: ", "Grabbing" if self.hatch_grabber.state == HatchGrabberPositions.GRABBING else "Released")
+            dash.putString("Rack: ", "Extended" if self.hatch_rack.state == HatchRackPositions.EXTENDED else "Retracted")            
+            dash.putString("Drive Mode: ", "Arcade Drive" if self.drivetrain.drive_mode == DriveModes.ARCADEDRIVE else "Tank Drive")
+            self.camera_table.putString("Selected Camera", f"{self.current_camera}")
+
+
 if __name__ == "__main__":
     wpilib.run(Robot)

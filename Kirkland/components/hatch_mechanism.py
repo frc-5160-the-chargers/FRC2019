@@ -105,6 +105,18 @@ class HatchMechanism:
             self.state = HatchMechanismState.EXTENDED_RELEASED
             self.hatch_grabber.release()
 
+    def toggle_grab(self):
+        if self.hatch_grabber.state == HatchGrabberPositions.GRABBING:
+            self.release()
+        else:
+            self.grab()
+    
+    def toggle_extended(self):
+        if self.hatch_rack.state == HatchRackPositions.EXTENDED:
+            self.retract()
+        else:
+            self.extend()
+
     def execute(self):
         pass
 

@@ -65,7 +65,7 @@ class OI:
         return deadzoned ** 3
 
     def get_drivetrain_shift(self):
-        return self.get_button_pressed_config(self.driver, "shift_drivetrain")
+        return self.get_button_config_pressed(self.driver, "shift_drivetrain")
     
     def get_drive_mode_switch(self):
         return self.get_button_config_pressed(self.driver, "drive_mode_switch")
