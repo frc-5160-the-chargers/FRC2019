@@ -7,29 +7,15 @@ import os
 
 import wpilib
 
-driver_setting_file = "driver_settings.json"
-
-
 class OI:
     def __init__(self):
         self.settings = {}
-        try:
-            self.load_settings()
-        except:
-            self.reset_settings()
+        self.load_settings()
 
         self.driver = wpilib.XboxController(0)
         self.sysop = wpilib.XboxController(1)
 
     def load_settings(self):
-        with open(driver_setting_file, 'r') as f:
-            self.settings = json.load(f)
-
-    def write_settings(self):
-        with open(driver_setting_file, 'w') as f:
-            json.dump(self.settings, f)
-
-    def reset_settings(self):
         default_settings = {
             # driver controls
             "shift_drivetrain": wpilib.XboxController.Button.kBumperRight,
@@ -47,7 +33,6 @@ class OI:
         }
 
         self.settings = default_settings
-        self.write_settings()
 
     def get_button_pressed(self, controller : wpilib.XboxController, button):
         return controller.getRawButtonPressed(button)
