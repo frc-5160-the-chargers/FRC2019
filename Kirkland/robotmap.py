@@ -90,8 +90,8 @@ class Tuning:
 
     class HatchMechanism:
         class Grabber:
-            grabbing_state = DoubleSolenoid.Value.kReverse
-            released_state = DoubleSolenoid.Value.kForward
+            grabbing_state = DoubleSolenoid.Value.kForward
+            released_state = DoubleSolenoid.Value.kReverse
 
         class Rack:
             extended_state = DoubleSolenoid.Value.kForward

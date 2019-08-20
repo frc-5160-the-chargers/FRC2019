@@ -17,7 +17,7 @@ import robotmap
 from oi import OI
 
 
-class Robot(magicbot.MagicRobot):
+class MyRobot(magicbot.MagicRobot):
     # high level components
     cargo_mechanism: CargoMechanism
     hatch_mechanism: HatchMechanism
@@ -91,10 +91,10 @@ class Robot(magicbot.MagicRobot):
         self.oi = OI()
 
         # run camera streaming program
-        wpilib.CameraServer.launch("camera_streaming.py:main")
+        wpilib.CameraServer.launch("vision.py:main")
         self.current_camera = 0
         self.camera_table = networktables.NetworkTables.getTable(
-            "/CameraPublisher")
+           "/CameraPublisher")
 
         # this is important for this year...
         self.use_teleop_in_autonomous = True
@@ -105,7 +105,7 @@ class Robot(magicbot.MagicRobot):
         self.hatch_mechanism.reset()
 
     def teleopPeriodic(self):
-        with self.consumeExceptions():
+        try:
             # DRIVETRAIN
             if self.drivetrain.drive_mode == DriveModes.ARCADEDRIVE:
                 self.drivetrain.arcade_drive(self.oi.drivetrain_curve(self.oi.driver.getY(
@@ -150,7 +150,8 @@ class Robot(magicbot.MagicRobot):
             dash.putString("Rack: ", "Extended" if self.hatch_rack.state == HatchRackPositions.EXTENDED else "Retracted")            
             dash.putString("Drive Mode: ", "Arcade Drive" if self.drivetrain.drive_mode == DriveModes.ARCADEDRIVE else "Tank Drive")
             self.camera_table.putString("Selected Camera", f"{self.current_camera}")
-
+        except:
+            self.onException()
 
 if __name__ == "__main__":
-    wpilib.run(Robot)
+    wpilib.run(MyRobot)
