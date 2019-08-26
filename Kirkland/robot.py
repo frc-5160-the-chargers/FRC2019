@@ -109,7 +109,7 @@ class MyRobot(magicbot.MagicRobot):
             # DRIVETRAIN
             if self.drivetrain.drive_mode == DriveModes.ARCADEDRIVE:
                 self.drivetrain.arcade_drive(self.oi.drivetrain_curve(self.oi.driver.getY(
-                    self.oi.driver.Hand.kRight)), -self.oi.driver.getX(self.oi.driver.Hand.kRight))
+                    self.oi.driver.Hand.kLeft)), -self.oi.driver.getX(self.oi.driver.Hand.kRight)/1.5)
             elif self.drivetrain.drive_mode == DriveModes.TANKDRIVE:
                 self.drivetrain.tank_drive(self.oi.drivetrain_curve(self.oi.driver.getY(
                     self.oi.driver.Hand.kLeft)), self.oi.drivetrain_curve(self.oi.driver.getY(self.oi.driver.Hand.kRight)))
