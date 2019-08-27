@@ -1,210 +1,157 @@
+# robot.py
+# the actual robot code and main execution stuff
+
 import magicbot
 import wpilib
+from wpilib import SmartDashboard as dash
 import ctre
-import navx
-
-from components.pressure_sensor import AnalogPressureSensor
-from components.navx import NavX
-from components.drivetrain import Drivetrain, DriveModes
-from components.pneumatic_assemblies import HatchGrab, HatchRack, Shifters
-from components.cargo_mechanism import CargoMechanism
-from components.arduino import ArduinoHandler
-from components.cargo_servo import CargoServo, CargoServoPosition
-
-from controllers.drivetrain_pid import DriveStraightPID, TurnPID
-from controllers.alignment_routine import AlignmentController
-
-from arduino.data_server import ArduinoServer
 
 import networktables
 
+from components.cargo_mechanism import *
+from components.drivetrain import *
+from components.hatch_mechanism import *
+from components.pressure_sensor import *
+
 import robotmap
+from oi import OI
 
-if robotmap.spoofing_arduino:
-    from arduino.serial_spoofed import ArduinoServer
-
-from motor_configurator import configure_cargo_redline, bulk_config_drivetrain 
-from oi import OI, Side
 
 class MyRobot(magicbot.MagicRobot):
-    # components
-    cargo_mechanism :   CargoMechanism
-    navx_board :        NavX
-    drivetrain :        Drivetrain
-    hatch_rack :        HatchRack
-    hatch_grab :        HatchGrab
-    gearbox_shifters :  Shifters
-    arduino_component : ArduinoHandler
-    cargo_lock :        CargoServo
+    # high level components
+    cargo_mechanism: CargoMechanism
+    hatch_mechanism: HatchMechanism
+    drivetrain_mechanism: DrivetrainMechanism
+    pressure_sensor: PressureSensor
 
-    controller_alignment :      AlignmentController
+    # low level components
+    cargo_rotator: CargoRotator
+    cargo_locking_servo: CargoServo
+
+    hatch_grabber: HatchGrabber
+    hatch_rack: HatchRack
+
+    drivetrain: Drivetrain
+    shifters: Shifters
 
     def createObjects(self):
-        """
-        Create motors and stuff here
-        """
-        # DRIVETRAIN
-        # drivetrain motors
-        self.right_front_motor = ctre.WPI_TalonSRX(robotmap.right_back_drive)
-        self.right_back_motor = ctre.WPI_TalonSRX(robotmap.right_bottom_drive)
-        self.right_top_motor = ctre.WPI_TalonSRX(robotmap.right_top_drive)
-        self.left_back_motor = ctre.WPI_TalonSRX(robotmap.left_bottom_drive)
-        self.left_front_motor = ctre.WPI_TalonSRX(robotmap.left_front_drive)
-        self.left_top_motor = ctre.WPI_TalonSRX(robotmap.left_top_drive)
-
-        # configure motors - current limit, ramp rate, etc.
-        bulk_config_drivetrain(self.right_front_motor, self.right_back_motor, self.right_top_motor, self.left_front_motor, self.left_back_motor, self.left_top_motor)
-
-        # create motor groups based on side
-        self.left_drive_motors = wpilib.SpeedControllerGroup(self.left_back_motor, self.left_front_motor, self.left_top_motor)
-        self.right_drive_motors = wpilib.SpeedControllerGroup(self.right_front_motor, self.right_back_motor, self.right_top_motor)
-
-        # create drivetrain based on groupings
-        self.drive = wpilib.drive.DifferentialDrive(self.left_drive_motors, self.right_drive_motors)
-
-
         # CARGO MECHANISM
-        # cargo mechanism motors
-        self.cargo_mechanism_motor = ctre.WPI_TalonSRX(robotmap.cargo_motor)
-        configure_cargo_redline(self.cargo_mechanism_motor)
+        self.cargo_mechanism_motor_rotator = ctre.WPI_TalonSRX(
+            robotmap.Ports.Cargo.rotator)
+        self.cargo_mechanism_servo_lock = wpilib.Servo(
+            robotmap.Ports.Cargo.locking_servo)
 
-        # cargo mechanism servo
-        self.cargo_servo_rotator = wpilib.Servo(robotmap.cargo_servo)
+        utils.configure_motor(
+            self.cargo_mechanism_motor_rotator, ctre.NeutralMode.Brake)
 
-        # PNEUMATICS
-        # drawer extenders
-        self.hatch_extension_actuator_left = wpilib.DoubleSolenoid(robotmap.hatch_extension_pcm, robotmap.hatch_extension_left_front, robotmap.hatch_extension_left_back)
-        self.hatch_extension_actuator_right = wpilib.DoubleSolenoid(robotmap.hatch_extension_pcm, robotmap.hatch_extension_right_front, robotmap.hatch_extension_right_back)    
+        # HATCH MECHANISM
+        self.hatch_grab_actuator = wpilib.DoubleSolenoid(
+            robotmap.Ports.Hatch.Grabber.pcm, robotmap.Ports.Hatch.Grabber.front, robotmap.Ports.Hatch.Grabber.back)
+        self.hatch_rack_actuator_left = wpilib.DoubleSolenoid(
+            robotmap.Ports.Hatch.Extension.pcm, robotmap.Ports.Hatch.Extension.left_front, robotmap.Ports.Hatch.Extension.left_back)
+        self.hatch_rack_actuator_right = wpilib.DoubleSolenoid(
+            robotmap.Ports.Hatch.Extension.pcm, robotmap.Ports.Hatch.Extension.right_front, robotmap.Ports.Hatch.Extension.right_back)
 
-        # grabber
-        self.hatch_grab_actuator = wpilib.DoubleSolenoid(robotmap.grabber_pcm, robotmap.hatch_grab_front, robotmap.hatch_grab_back)
+        # DRIVETRAIN SYSTEM
+        # TODO fix motor port naming.
+        self.drivetrain_right_front = ctre.WPI_TalonSRX(
+            robotmap.Ports.Drivetrain.Motors.right_back)
+        self.drivetrain_right_back = ctre.WPI_TalonSRX(
+            robotmap.Ports.Drivetrain.Motors.right_bottom)
+        self.drivetrain_right_top = ctre.WPI_TalonSRX(
+            robotmap.Ports.Drivetrain.Motors.right_top)
 
-        # shifters
-        self.left_shifter_actuator = wpilib.DoubleSolenoid(robotmap.shifter_pcm, robotmap.shifter_left_front, robotmap.shifter_left_back)
-        self.right_shifter_actuator = wpilib.DoubleSolenoid(robotmap.shifter_pcm, robotmap.shifter_right_front, robotmap.shifter_right_back)
+        self.drivetrain_left_front = ctre.WPI_TalonSRX(
+            robotmap.Ports.Drivetrain.Motors.left_front)
+        self.drivetrain_left_back = ctre.WPI_TalonSRX(
+            robotmap.Ports.Drivetrain.Motors.left_bottom)
+        self.drivetrain_left_top = ctre.WPI_TalonSRX(
+            robotmap.Ports.Drivetrain.Motors.left_top)
 
-        # pressure sensor
-        self.pressure_sensor = AnalogPressureSensor(1)
-        
-        # MISC/SENSORS
-        # navx board
-        self.navx = navx.AHRS.create_spi()
+        utils.configure_drivetrain_motors(self.drivetrain_left_back, self.drivetrain_left_front, self.drivetrain_left_top,
+                                          self.drivetrain_right_back, self.drivetrain_right_front, self.drivetrain_right_top)
 
-        # oi class
+        self.drivetrain_right_motors = wpilib.SpeedControllerGroup(
+            self.drivetrain_right_back, self.drivetrain_right_front, self.drivetrain_right_top)
+        self.drivetrain_left_motors = wpilib.SpeedControllerGroup(
+            self.drivetrain_left_back, self.drivetrain_left_front, self.drivetrain_left_top)
+
+        self.differential_drive = wpilib.drive.DifferentialDrive(
+            self.drivetrain_left_motors, self.drivetrain_right_motors)
+
+        self.left_shifter_actuator = wpilib.DoubleSolenoid(
+            robotmap.Ports.Drivetrain.Shifters.pcm, robotmap.Ports.Drivetrain.Shifters.left_front, robotmap.Ports.Drivetrain.Shifters.left_back)
+        self.right_shifter_actuator = wpilib.DoubleSolenoid(
+            robotmap.Ports.Drivetrain.Shifters.pcm, robotmap.Ports.Drivetrain.Shifters.right_front, robotmap.Ports.Drivetrain.Shifters.right_back)
+
+        self.pressure_sensor_input = wpilib.AnalogInput(
+            robotmap.Ports.PressureSensor.port)
+
+        # MISC
         self.oi = OI()
 
-        # pid controllers
-        self.drive_forwards_pid = wpilib.PIDController(
-                                    robotmap.drive_kP,
-                                    robotmap.drive_kI, 
-                                    robotmap.drive_kD,
-                                    lambda: self.drivetrain.get_average_position(),
-                                    lambda x: self.drivetrain.teleop_drive_robot(speed=x))
-        self.turn_pid = wpilib.PIDController(
-                                    robotmap.turn_kP,
-                                    robotmap.turn_kI,
-                                    robotmap.turn_kD,
-                                    lambda: self.navx_board.get_rotation(),
-                                    lambda x: self.drivetrain.teleop_drive_robot(rotation=x))
-        self.drive_forwards_pid.setToleranceBuffer(robotmap.drive_buffer)
-        self.turn_pid.setToleranceBuffer(robotmap.turn_buffer)
-
-        # launch automatic camera capturing for main drive cam
+        # run camera streaming program
         wpilib.CameraServer.launch("vision.py:main")
+        self.current_camera = 0
+        self.camera_table = networktables.NetworkTables.getTable(
+           "/CameraPublisher")
 
-        # launch arduino code and start data server
-        self.arduino_server = ArduinoServer()
-        self.arduino_server.startServer()
-
+        # this is important for this year...
+        self.use_teleop_in_autonomous = True
 
     def teleopInit(self):
-        """
-        Called when the robot starts; optional
-        """
-        self.oi.load_user_settings()
-        self.oi.arcade_drive = True
-        self.navx_board.reset_rotation()
-        self.controller_alignment.stop_reset_drivetrain()
-        self.currentCam = 0
-        self.table = networktables.NetworkTables.getTable("/CameraPublisher")
+        self.drivetrain_mechanism.reset()
+        self.cargo_mechanism.reset()
+        self.hatch_mechanism.reset()
 
     def teleopPeriodic(self):
-        """
-        Called on each iteration of the control loop for both auton and tele
-        """
-        # TODO Individual try catches
         try:
-            # set drivetrain power
-            if self.drivetrain.current_mode == DriveModes.DRIVEROPERATED:
-                if self.oi.arcade_drive:
-                    self.drivetrain.teleop_drive_robot(speed=self.oi.process_driver_input(Side.LEFT), rotation=self.oi.process_driver_input(Side.RIGHT))
-                else:
-                    self.drivetrain.teleop_drive_robot(left_speed=self.oi.process_driver_input(Side.LEFT), right_speed=self.oi.process_driver_input(Side.RIGHT))
+            # DRIVETRAIN
+            if self.drivetrain.drive_mode == DriveModes.ARCADEDRIVE:
+                self.drivetrain.arcade_drive(self.oi.drivetrain_curve(self.oi.driver.getY(
+                    self.oi.driver.Hand.kLeft)), -self.oi.driver.getX(self.oi.driver.Hand.kRight)/1.5)
+            elif self.drivetrain.drive_mode == DriveModes.TANKDRIVE:
+                self.drivetrain.tank_drive(self.oi.drivetrain_curve(self.oi.driver.getY(
+                    self.oi.driver.Hand.kLeft)), self.oi.drivetrain_curve(self.oi.driver.getY(self.oi.driver.Hand.kRight)))
 
-            #calibrate the analog pressure sensor
-            if self.oi.calibrate_pressure_sensor():
+            if self.oi.get_drivetrain_shift():
+                self.drivetrain_mechanism.toggle_shift()
+
+            if self.oi.get_drive_mode_switch():
+                self.drivetrain.toggle_mode()
+
+            # HATCHES
+            if self.oi.get_hatch_grabber():
+                self.hatch_mechanism.toggle_grab()
+
+            if self.oi.get_hatch_rack():
+                self.hatch_mechanism.toggle_extended()
+
+            # CARGO
+            cargo_power = self.oi.process_deadzone(self.oi.sysop.getY(self.oi.sysop.Hand.kLeft), robotmap.Tuning.CargoMechanism.deadzone)
+            if cargo_power > 0:
+                self.cargo_mechanism.raise_lift(cargo_power)
+            if cargo_power < 0:
+                self.cargo_mechanism.lower_lift(-cargo_power)
+
+            if self.oi.get_cargo_lock():
+                self.cargo_mechanism.toggle_lock()
+
+            # SENSORS
+            if self.oi.get_camera_switch():
+                self.current_camera = 0 if self.current_camera == 1 else 1
+
+            if self.oi.get_calibrate_pressure():
                 self.pressure_sensor.calibrate_pressure()
 
-            # BEAST MODE
-            if self.oi.beast_mode():
-                self.oi.beast_mode_active = not self.oi.beast_mode_active
-
-            # handle the cargo mechanism
-            if self.oi.toggle_cargo_lock():
-                self.cargo_lock.toggle_lock()
-
-            # operate the hatch mechanism
-            # the drawer
-            if self.oi.extend_hatch():
-                self.hatch_rack.toggle_state()
-            # grabber
-            if self.oi.grab_hatch():
-                self.hatch_grab.toggle_state()
-
-            # shift the drivetrain gear ratios
-            if self.oi.shift_drivetrain():
-                # shift the drivetrain
-                self.gearbox_shifters.toggle_shift()
-
-            # if self.oi.arcade_tank_shift():
-            #     self.oi.arcade_drive = not self.oi.arcade_drive
-
-            # run alignment routine as needed
-            # if self.oi.start_alignment():
-            #     self.controller_alignment.start_alignment()
-            
-            # if self.oi.stop_alignment():
-            #     self.controller_alignment.interrupt()
-
-            if self.cargo_lock.current_position == CargoServoPosition.UNLOCKED:
-                self.cargo_mechanism.power = self.oi.process_cargo_control()
-            else:
-                p = self.oi.process_cargo_control() if self.oi.process_cargo_control() < 0 else 0
-                self.cargo_mechanism.power = -0.1 + p
-
-            #display calibrated air pressure in smart dashboard
-            wpilib.SmartDashboard.putNumber("Calibrated Pressure", self.pressure_sensor.get_pressure_psi())
-            
-            # calibrate if needed
-            if self.oi.calibrate_pressure_sensor():
-                self.pressure_sensor.calibrate_pressure()
-
-            # booleans to indicate grabber status
-            wpilib.SmartDashboard.putString("hatch grabber status", "Latched" if self.hatch_grab.latched else "Not Latched")
-            wpilib.SmartDashboard.putString("hatch rack status", "Extended" if self.hatch_rack.extended else "Retracted")
-
-            # wpilib.SmartDashboard.putString("Tank drive", "Active" if self.drivetrain.current_mode != self.oi.arcade_drive else "Disabled")
-            wpilib.SmartDashboard.putString("Beast mode", "Active" if self.oi.beast_mode_active else "Disabled")
-
-            wpilib.SmartDashboard.putString("PixyCam Status", "Line Detected" if self.arduino_component.safe_to_detect() else "Line not detected")
-
-            if self.oi.switch_cameras():
-                self.currentCam = 0 if self.currentCam == 1 else 1
-
-            self.table.putString("selected", "{}".format(self.currentCam))
+            # SMARTDASHBOARD
+            dash.putNumber("Calibrated Pressure: ", self.pressure_sensor.get_pressure())
+            dash.putString("Grabber: ", "Grabbing" if self.hatch_grabber.state == HatchGrabberPositions.GRABBING else "Released")
+            dash.putString("Rack: ", "Extended" if self.hatch_rack.state == HatchRackPositions.EXTENDED else "Retracted")            
+            dash.putString("Drive Mode: ", "Arcade Drive" if self.drivetrain.drive_mode == DriveModes.ARCADEDRIVE else "Tank Drive")
+            self.camera_table.putString("Selected Camera", f"{self.current_camera}")
         except:
             self.onException()
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     wpilib.run(MyRobot)

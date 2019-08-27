@@ -1,74 +1,109 @@
-import math
+# robotmap.py
+# pretty much all of the robot configuration
+# note the class structure, this makes it easier to access things without having really long and confusing variable names
 
-spoofing_arduino = False
-
-# drivetrain
-# note that front is the motor towards the front, back is back, and top is the one physically above the others
-left_front_drive = 5
-left_top_drive = 6
-left_bottom_drive = 7
-right_back_drive = 4
-right_top_drive = 2
-right_bottom_drive = 3
-
-# cargo device
-cargo_motor = 8
-
-# cargo servo
-cargo_servo = 0
+from wpilib import DoubleSolenoid
+from ctre import NeutralMode
 
 
-#solenoids
-# there are now two actuators being used to move the extension
-hatch_extension_pcm = 0
-hatch_extension_left_front = 4
-hatch_extension_left_back = 5
-hatch_extension_right_front = 6
-hatch_extension_right_back = 7
+class Ports:
+    class Drivetrain:
+        class Motors:
+            left_front = 5
+            left_top = 6
+            left_bottom = 7
 
-shifter_pcm = 0
-shifter_right_front = 3
-shifter_right_back = 2
-shifter_left_front = 1
-shifter_left_back = 0
+            right_back = 4
+            right_top = 2
+            right_bottom = 3
 
-# these should be on a different pcm
-grabber_pcm = 1
-hatch_grab_front = 1
-hatch_grab_back = 0
+        class Shifters:
+            pcm = 0
 
+            left_front = 1
+            left_back = 0
 
-# these are just some constants that define robot movement
-wheel_circumference = 6*math.pi
-encoder_ticks_per_rotation = 4096 # talon srx defaults to 4096 ticks per rotation
-encoder_output_shaft_ratio = 7.5 # 7.5:1 encoder shaft:output shaft
-ticks_per_output_shaft_rotation = encoder_output_shaft_ratio*encoder_ticks_per_rotation
-ticks_per_inch = ticks_per_output_shaft_rotation/wheel_circumference
+            right_front = 3
+            right_back = 2
 
+    class Cargo:
+        rotator = 8
 
-# PID constants
-# driving
-drive_kP = 0.2
-drive_kI = 0
-drive_kD = 0
-drive_buffer = 5
+        locking_servo = 0
 
-# turning
-turn_kP = 0.1
-turn_kI = 0
-turn_kD = 0
-turn_buffer = 5
+    class Hatch:
+        class Extension:
+            pcm = 0
 
+            left_front = 4
+            left_back = 5
 
-# speed limits
-# drivetrain when pid controlling
-drive_pid_power_straight = .5
-drive_pid_power_turn = .5
+            right_front = 6
+            right_back = 7
+
+        class Grabber:
+            pcm = 1
+
+            front = 1
+            back = 0
+
+    class PressureSensor:
+        port = 1
 
 
-# Constants for the arduino server logic
-gathering_buffer = 1       # take the last x vectors to calculate
-gathering_time = 15          # if the number of failed detections is greater than this, dont use data
-camera_center = 78/2        # center coordinate of camera
-drive_power_constant = .2   # kind of like a P constant in a way, multiplied by center error to get power
-drive_power_side_ratio = .7
+class Physics:
+    class Drivetrain:
+        diameter = 6  # inches
+        circumference = diameter * 3.14
+
+        ticks_per_rotation = 4096  # talon srx default
+        output_shaft_ratio = 7.5  # for every 7.5 encoder rotations, the output shaft turns once
+
+        ticks_per_output_rotation = ticks_per_rotation * output_shaft_ratio
+        ticks_per_inch = ticks_per_output_rotation / circumference
+
+    class PressureSensor:
+        calibration_pressure = 112
+
+
+class Tuning:
+    class Drivetrain:
+        motor_power_percentage_limit = .5
+
+        min_shifting_speed = 5
+        shifting_speed_enabled = False
+
+        class Shifters:
+            low_gear_state = DoubleSolenoid.Value.kForward
+            high_gear_state = DoubleSolenoid.Value.kReverse
+
+    class CargoMechanism:
+        deadzone = 0.1
+
+        class Rotator:
+            lifting_power_limit = .25
+            lowering_power_limit = .2
+
+        class Servo:
+            locked_position = 180
+            unlocked_position = 0
+
+    class HatchMechanism:
+        class Grabber:
+            grabbing_state = DoubleSolenoid.Value.kForward
+            released_state = DoubleSolenoid.Value.kReverse
+
+        class Rack:
+            extended_state = DoubleSolenoid.Value.kForward
+            retracted_state = DoubleSolenoid.Value.kReverse
+
+
+class MotorConfiguration:
+    class Drivetrain:
+        peak_current = 30
+        peak_current_duration = 5
+        neutral_mode = NeutralMode.Coast
+        ramp_rate = 0.3
+
+    class Cargo:
+        pass

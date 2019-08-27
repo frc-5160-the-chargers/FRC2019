@@ -1,107 +1,168 @@
-import enum
+# drivetrain.py
+# the code to control the drivetrain and shifters
 
 from ctre import WPI_TalonSRX
-from wpilib import SpeedControllerGroup
+from wpilib import SpeedControllerGroup, DoubleSolenoid
 from wpilib.drive import DifferentialDrive
 
-from motor_configurator import bulk_config_drivetrain_coast
-
 import robotmap
-
-from oi import OI, Side
-
 import utils
 
-class DriveModes(enum.Enum):
-    DRIVEROPERATED = enum.auto()
-    PIDOPERATED = enum.auto()
-    ALIGNMENTOPERATED = enum.auto()
+import enum
 
-class Drivetrain:
-    right_front_motor:  WPI_TalonSRX
-    right_back_motor:   WPI_TalonSRX
-    right_top_motor:    WPI_TalonSRX
-    left_back_motor:    WPI_TalonSRX
-    left_front_motor:   WPI_TalonSRX
-    left_top_motor:     WPI_TalonSRX
 
-    left_drive_motors:  SpeedControllerGroup
-    right_drive_motors: SpeedControllerGroup
+class ShifterGear(enum.Enum):
+    LOW_GEAR = enum.auto()
+    HIGH_GEAR = enum.auto()
 
-    drive:              DifferentialDrive
 
-    oi:                 OI
+class Shifters:
+    left_shifter_actuator: DoubleSolenoid
+    right_shifter_actuator: DoubleSolenoid
 
     def __init__(self):
-        self.left_speed = 0
-        self.right_speed = 0
+        # NOTE: make sure that the robot is forced into low gear at the start of a match
+        self.gear = ShifterGear.LOW_GEAR
+
+    def shift_up(self):
+        self.gear = ShifterGear.HIGH_GEAR
+
+    def shift_down(self):
+        self.gear = ShifterGear.LOW_GEAR
+
+    def toggle(self):
+        self.gear = ShifterGear.LOW_GEAR if self.gear == ShifterGear.HIGH_GEAR else ShifterGear.HIGH_GEAR
+
+    def execute(self):
+        if self.gear == ShifterGear.LOW_GEAR:
+            self.left_shifter_actuator.set(
+                robotmap.Tuning.Drivetrain.Shifters.low_gear_state)
+            self.right_shifter_actuator.set(
+                robotmap.Tuning.Drivetrain.Shifters.low_gear_state)
+
+        if self.gear == ShifterGear.HIGH_GEAR:
+            self.left_shifter_actuator.set(
+                robotmap.Tuning.Drivetrain.Shifters.high_gear_state)
+            self.right_shifter_actuator.set(
+                robotmap.Tuning.Drivetrain.Shifters.high_gear_state)
+
+
+class DriveModes(enum.Enum):
+    TANKDRIVE = enum.auto()
+    ARCADEDRIVE = enum.auto()
+
+
+class Drivetrain:
+    drivetrain_right_front: WPI_TalonSRX
+    drivetrain_right_back: WPI_TalonSRX
+    drivetrain_right_top: WPI_TalonSRX
+
+    drivetrain_left_front: WPI_TalonSRX
+    drivetrain_left_back: WPI_TalonSRX
+    drivetrain_left_top: WPI_TalonSRX
+
+    drivetrain_right_motors: SpeedControllerGroup
+    drivetrain_left_motors: SpeedControllerGroup
+
+    differential_drive: DifferentialDrive
+
+    def __init__(self):
+        self.drive_mode = DriveModes.ARCADEDRIVE
+
+        self.left_power = 0
+        self.right_power = 0
 
         self.speed = 0
         self.rotation = 0
 
-        self.current_mode = DriveModes.DRIVEROPERATED
-
-    def set_coast_motors(self):
-        bulk_config_drivetrain_coast(self.right_back_motor, self.right_front_motor, self.right_top_motor, self.left_back_motor, self.left_top_motor, self.left_front_motor)
-
-    def teleop_drive_robot(self, left_speed=0, right_speed=0, speed=0, rotation=0):
-        self.left_speed = left_speed
-        self.right_speed = right_speed
-        self.speed = speed
+    def arcade_drive(self, power, rotation):
+        self.drive_mode = DriveModes.ARCADEDRIVE
+        self.speed = utils.clamp(power, -robotmap.Tuning.Drivetrain.motor_power_percentage_limit,
+                                 robotmap.Tuning.Drivetrain.motor_power_percentage_limit)
         self.rotation = rotation
 
-    def get_left_position(self):
-        # NOTE left_front_motor has the left encoder
-        return -self.left_front_motor.getQuadraturePosition() / robotmap.ticks_per_inch
-    def get_right_position(self):
-        # NOTE right_top_motor has the right encoder
-        return self.right_top_motor.getQuadraturePosition() / robotmap.ticks_per_inch
-    def get_average_position(self):
-        return (self.get_left_position()+self.get_right_position()) / 2.0
+    def tank_drive(self, left_power, right_power):
+        self.drive_mode = DriveModes.TANKDRIVE
+        self.left_power = utils.clamp(left_power, -robotmap.Tuning.Drivetrain.motor_power_percentage_limit,
+                                      robotmap.Tuning.Drivetrain.motor_power_percentage_limit)
+        self.right_power = utils.clamp(right_power, -robotmap.Tuning.Drivetrain.motor_power_percentage_limit,
+                                       robotmap.Tuning.Drivetrain.motor_power_percentage_limit)
 
-    def get_left_velocity(self):
-        return self.left_front_motor.getQuadratureVelocity()
-    def get_right_velocity(self):
-        return self.right_top_motor.getQuadratureVelocity()
-    def get_average_velocity(self):
-        return (self.get_left_velocity+self.get_right_velocity) / 2.0
-
-    def reset_left_encoder(self):
-        self.left_front_motor.setQuadraturePosition(0)
-    def reset_right_encoder(self):
-        self.right_top_motor.setQuadraturePosition(0)
-    def reset_encoders(self):
-        self.reset_left_encoder()
-        self.reset_right_encoder()
-
-    def set_motor_powers(self):
-        self.left_drive_motors.set(self.left_speed)
-        self.right_drive_motors.set(self.right_speed)
-
-    def reset_input(self):
-        self.left_speed, self.right_speed, self.rotation, self.speed = (0, 0, 0, 0)
+    def toggle_mode(self):
+        self.drive_mode = DriveModes.TANKDRIVE if self.drive_mode == DriveModes.ARCADEDRIVE else DriveModes.ARCADEDRIVE
 
     def stop_motors(self):
-        self.reset_input()
-        self.set_motor_powers()
+        self.left_power = 0
+        self.right_power = 0
 
-    def driver_takeover(self):
-        self.current_mode = DriveModes.DRIVEROPERATED
+        self.speed = 0
+        self.rotation = 0
+
+        self.differential_drive.stopMotor()
+
+    def get_left_position(self):
+        # NOTE: left_front is the one with the left encoder
+        return -self.drivetrain_left_front.getQuadraturePosition() / robotmap.Physics.Drivetrain.ticks_per_inch
+
+    def get_left_velocity(self):
+        return -self.drivetrain_left_front.getQuadratureVelocity()
+
+    def get_right_position(self):
+        # NOTE: right_front has the right encoder
+        return self.drivetrain_right_top.getQuadraturePosition() / robotmap.Physics.Drivetrain.ticks_per_inch
+
+    def get_right_velocity(self):
+        return self.drivetrain_right_top.getQuadratureVelocity()
+
+    def get_average_position(self):
+        return (self.get_left_position() + self.get_right_position()) / 2
+
+    def get_average_velocity(self):
+        return (self.get_left_velocity() + self.get_right_velocity()) / 2
+
+    def reset_encoders(self):
+        self.drivetrain_left_front.setQuadraturePosition(0)
+        self.drivetrain_right_top.setQuadraturePosition(0)
 
     def execute(self):
-        if self.current_mode == DriveModes.DRIVEROPERATED:
-            if self.oi.arcade_drive:
-                self.drive.arcadeDrive(self.speed, self.rotation)
-            else:
-                self.drive.tankDrive(self.left_speed, self.right_speed)
+        if self.drive_mode == DriveModes.TANKDRIVE:
+            self.differential_drive.tankDrive(
+                self.left_power, self.right_power)
+        if self.drive_mode == DriveModes.ARCADEDRIVE:
+            self.differential_drive.arcadeDrive(self.speed, self.rotation)
 
-        if self.current_mode == DriveModes.PIDOPERATED:
-            # NOTE when doing pid driving it is usually a good idea to limit the speed a bit 
-            self.speed = utils.clamp(self.speed, -robotmap.drive_pid_power_straight, robotmap.drive_pid_power_straight)
-            self.rotation = utils.clamp(self.rotation, -robotmap.drive_pid_power_turn, robotmap.drive_pid_power_turn)
-            self.drive.arcadeDrive(self.speed, self.rotation)
 
-        if self.current_mode == DriveModes.ALIGNMENTOPERATED:
-            self.left_speed = utils.clamp(self.left_speed, -robotmap.drive_pid_power_turn, robotmap.drive_pid_power_turn)
-            self.right_speed = utils.clamp(self.right_speed, -robotmap.drive_pid_power_turn, robotmap.drive_pid_power_turn)
-            self.drive.tankDrive(self.left_speed, self.right_speed)
+class DrivetrainMechanism:
+    drivetrain: Drivetrain
+    shifters: Shifters
+
+    def __init__(self):
+        pass
+
+    def shift_up(self):
+        if robotmap.Tuning.Drivetrain.shifting_speed_enabled:
+            if abs(self.drivetrain.get_average_velocity()) > robotmap.Tuning.Drivetrain.min_shifting_speed:
+                self.shifters.shift_up()
+        else:
+            self.shifters.shift_up()
+
+    def shift_down(self):
+        if robotmap.Tuning.Drivetrain.shifting_speed_enabled:
+            if abs(self.drivetrain.get_average_velocity()) > robotmap.Tuning.Drivetrain.min_shifting_speed:
+                self.shifters.shift_down()
+        else:
+            self.shifters.shift_down()
+
+    def toggle_shift(self):
+        if self.shifters.gear == ShifterGear.HIGH_GEAR:
+            self.shift_down()
+        else:
+            self.shift_up()
+
+    def execute(self):
+        pass
+
+    def reset(self):
+        self.drivetrain.drive_mode = DriveModes.ARCADEDRIVE
+        self.drivetrain.stop_motors()
+        self.shifters.shift_down()
