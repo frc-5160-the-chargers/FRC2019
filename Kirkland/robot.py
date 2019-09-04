@@ -5,6 +5,7 @@ import magicbot
 import wpilib
 from wpilib import SmartDashboard as dash
 import ctre
+import navx
 
 import networktables
 
@@ -99,6 +100,8 @@ class MyRobot(magicbot.MagicRobot):
         # this is important for this year...
         self.use_teleop_in_autonomous = True
 
+        self.navx = navx.AHRS.create_spi()
+
     def teleopInit(self):
         self.drivetrain_mechanism.reset()
         self.cargo_mechanism.reset()
@@ -113,12 +116,17 @@ class MyRobot(magicbot.MagicRobot):
             elif self.drivetrain.drive_mode == DriveModes.TANKDRIVE:
                 self.drivetrain.tank_drive(self.oi.drivetrain_curve(self.oi.driver.getY(
                     self.oi.driver.Hand.kLeft)), self.oi.drivetrain_curve(self.oi.driver.getY(self.oi.driver.Hand.kRight)))
+            elif self.drivetrain.drive_mode == DriveModes.DRIVESTRAIGHTARCADE:
+                self.drivetrain.drive_straight(self.oi.drivetrain_curve(self.oi.driver.getY(self.oi.driver.Hand.kLeft)))
 
             if self.oi.get_drivetrain_shift():
                 self.drivetrain_mechanism.toggle_shift()
 
             if self.oi.get_drive_mode_switch():
                 self.drivetrain.toggle_mode()
+
+            if self.oi.get_start_drive_straight():
+                self.drivetrain.start_drive_straight()
 
             # HATCHES
             if self.oi.get_hatch_grabber():
@@ -149,6 +157,8 @@ class MyRobot(magicbot.MagicRobot):
             dash.putString("Grabber: ", "Grabbing" if self.hatch_grabber.state == HatchGrabberPositions.GRABBING else "Released")
             dash.putString("Rack: ", "Extended" if self.hatch_rack.state == HatchRackPositions.EXTENDED else "Retracted")            
             dash.putString("Drive Mode: ", "Arcade Drive" if self.drivetrain.drive_mode == DriveModes.ARCADEDRIVE else "Tank Drive")
+            dash.putString("Current Angle: ", self.navx.getAngle())
+            dash.putString("Current rotation: ", self.drivetrain.rotation)
             self.camera_table.putString("Selected Camera", f"{self.current_camera}")
         except:
             self.onException()

@@ -4,11 +4,13 @@
 from ctre import WPI_TalonSRX
 from wpilib import SpeedControllerGroup, DoubleSolenoid
 from wpilib.drive import DifferentialDrive
+import navx
 
 import robotmap
 import utils
 
 import enum
+import math
 
 
 class ShifterGear(enum.Enum):
@@ -50,6 +52,7 @@ class Shifters:
 class DriveModes(enum.Enum):
     TANKDRIVE = enum.auto()
     ARCADEDRIVE = enum.auto()
+    DRIVESTRAIGHTARCADE = enum.auto()
 
 
 class Drivetrain:
@@ -65,6 +68,8 @@ class Drivetrain:
     drivetrain_left_motors: SpeedControllerGroup
 
     differential_drive: DifferentialDrive
+
+    navx: navx.AHRS
 
     def __init__(self):
         self.drive_mode = DriveModes.ARCADEDRIVE
@@ -90,6 +95,16 @@ class Drivetrain:
 
     def toggle_mode(self):
         self.drive_mode = DriveModes.TANKDRIVE if self.drive_mode == DriveModes.ARCADEDRIVE else DriveModes.ARCADEDRIVE
+
+    def start_drive_straight(self):
+        self.navx.reset()
+        self.drive_mode = DriveModes.DRIVESTRAIGHTARCADE
+
+    def drive_straight(self, power):
+        self.speed = utils.clamp(power, -robotmap.Tuning.Drivetrain.motor_power_percentage_limit,
+                                robotmap.Tuning.Drivetrain.motor_power_percentage_limit)
+        raw_rotation = (self.navx.getAngle() * robotmap.Tuning.Drivetrain.drive_straight_constant)
+        self.rotation = math.copysign(abs(raw_rotation)**.5, raw_rotation)
 
     def stop_motors(self):
         self.left_power = 0
@@ -130,11 +145,13 @@ class Drivetrain:
                 self.left_power, self.right_power)
         if self.drive_mode == DriveModes.ARCADEDRIVE:
             self.differential_drive.arcadeDrive(self.speed, self.rotation)
-
+        if self.drive_mode == DriveModes.DRIVESTRAIGHTARCADE:
+            self.differential_drive.arcadeDrive(self.speed, self.rotation)
 
 class DrivetrainMechanism:
     drivetrain: Drivetrain
     shifters: Shifters
+    navx: navx.AHRS
 
     def __init__(self):
         pass
