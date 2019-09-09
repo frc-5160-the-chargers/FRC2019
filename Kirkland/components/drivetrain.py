@@ -52,7 +52,7 @@ class Shifters:
 class DriveModes(enum.Enum):
     TANKDRIVE = enum.auto()
     ARCADEDRIVE = enum.auto()
-    DRIVESTRAIGHTARCADE = enum.auto()
+    DRIVETOANGLE = enum.auto()
 
 
 class Drivetrain:
@@ -80,6 +80,8 @@ class Drivetrain:
         self.speed = 0
         self.rotation = 0
 
+        self.angle = 0
+
     def arcade_drive(self, power, rotation):
         self.drive_mode = DriveModes.ARCADEDRIVE
         self.speed = utils.clamp(power, -robotmap.Tuning.Drivetrain.motor_power_percentage_limit,
@@ -93,18 +95,23 @@ class Drivetrain:
         self.right_power = utils.clamp(right_power, -robotmap.Tuning.Drivetrain.motor_power_percentage_limit,
                                        robotmap.Tuning.Drivetrain.motor_power_percentage_limit)
 
+    def drive_to_angle(self, power, angle=0):
+        if self.drive_mode != DriveModes.DRIVETOANGLE:
+            self.drive_mode = DriveModes.DRIVETOANGLE
+            self.navx.reset()
+        self.speed = utils.clamp(power, -robotmap.Tuning.Drivetrain.motor_power_percentage_limit,
+                                 robotmap.Tuning.Drivetrain.motor_power_percentage_limit)
+        rotation_error = self.navx.getAngle() - angle
+        raw_rotation = rotation_error * robotmap.Tuning.Drivetrain.drive_straight_constant
+        self.rotation = math.copysign(abs(raw_rotation)**.5, raw_rotation)
+
     def toggle_mode(self):
+        if self.drive_mode == DriveModes.DRIVETOANGLE:
+            self.drive_mode = DriveModes.ARCADEDRIVE
         self.drive_mode = DriveModes.TANKDRIVE if self.drive_mode == DriveModes.ARCADEDRIVE else DriveModes.ARCADEDRIVE
 
-    def start_drive_straight(self):
-        self.navx.reset()
-        self.drive_mode = DriveModes.DRIVESTRAIGHTARCADE
-
     def drive_straight(self, power):
-        self.speed = utils.clamp(power, -robotmap.Tuning.Drivetrain.motor_power_percentage_limit,
-                                robotmap.Tuning.Drivetrain.motor_power_percentage_limit)
-        raw_rotation = (self.navx.getAngle() * robotmap.Tuning.Drivetrain.drive_straight_constant)
-        self.rotation = math.copysign(abs(raw_rotation)**.5, raw_rotation)
+        self.drive_to_angle(power, 0)
 
     def stop_motors(self):
         self.left_power = 0
@@ -145,8 +152,9 @@ class Drivetrain:
                 self.left_power, self.right_power)
         if self.drive_mode == DriveModes.ARCADEDRIVE:
             self.differential_drive.arcadeDrive(self.speed, self.rotation)
-        if self.drive_mode == DriveModes.DRIVESTRAIGHTARCADE:
+        if self.drive_mode == DriveModes.DRIVETOANGLE:
             self.differential_drive.arcadeDrive(self.speed, self.rotation)
+
 
 class DrivetrainMechanism:
     drivetrain: Drivetrain

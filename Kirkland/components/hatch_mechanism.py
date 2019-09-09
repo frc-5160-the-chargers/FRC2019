@@ -86,24 +86,24 @@ class HatchMechanism:
         self.state = HatchMechanismState.RETRACTED_GRABBING
 
     def extend(self):
-        if self.state == HatchMechanismState.RETRACTED_GRABBING:
-            self.state = HatchMechanismState.EXTENDED_GRABBING
-            self.hatch_rack.extend()
+        # if self.state == HatchMechanismState.RETRACTED_GRABBING:
+        #     self.state = HatchMechanismState.EXTENDED_GRABBING
+        self.hatch_rack.extend()
 
     def retract(self):
-        if self.state == HatchMechanismState.EXTENDED_GRABBING:
-            self.state = HatchMechanismState.RETRACTED_GRABBING
-            self.hatch_rack.retract()
+        # if self.state == HatchMechanismState.EXTENDED_GRABBING:
+        #     self.state = HatchMechanismState.RETRACTED_GRABBING
+        self.hatch_rack.retract()
 
     def grab(self):
-        if self.state == HatchMechanismState.EXTENDED_RELEASED:
-            self.state = HatchMechanismState.EXTENDED_GRABBING
-            self.hatch_grabber.grab()
+        # if self.state == HatchMechanismState.EXTENDED_RELEASED:
+        #     self.state = HatchMechanismState.EXTENDED_GRABBING
+        self.hatch_grabber.grab()
 
     def release(self):
-        if self.state == HatchMechanismState.EXTENDED_GRABBING:
-            self.state = HatchMechanismState.EXTENDED_RELEASED
-            self.hatch_grabber.release()
+        # if self.state == HatchMechanismState.EXTENDED_GRABBING:
+        #     self.state = HatchMechanismState.EXTENDED_RELEASED
+        self.hatch_grabber.release()
 
     def toggle_grab(self):
         if self.hatch_grabber.state == HatchGrabberPositions.GRABBING:

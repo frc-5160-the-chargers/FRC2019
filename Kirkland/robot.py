@@ -116,17 +116,17 @@ class MyRobot(magicbot.MagicRobot):
             elif self.drivetrain.drive_mode == DriveModes.TANKDRIVE:
                 self.drivetrain.tank_drive(self.oi.drivetrain_curve(self.oi.driver.getY(
                     self.oi.driver.Hand.kLeft)), self.oi.drivetrain_curve(self.oi.driver.getY(self.oi.driver.Hand.kRight)))
-            elif self.drivetrain.drive_mode == DriveModes.DRIVESTRAIGHTARCADE:
+            
+            if self.oi.get_drive_straight():
                 self.drivetrain.drive_straight(self.oi.drivetrain_curve(self.oi.driver.getY(self.oi.driver.Hand.kLeft)))
+            elif self.drivetrain.drive_mode == DriveModes.DRIVETOANGLE:
+                self.drivetrain.drive_mode = DriveModes.ARCADEDRIVE
 
             if self.oi.get_drivetrain_shift():
                 self.drivetrain_mechanism.toggle_shift()
 
             if self.oi.get_drive_mode_switch():
                 self.drivetrain.toggle_mode()
-
-            if self.oi.get_start_drive_straight():
-                self.drivetrain.start_drive_straight()
 
             # HATCHES
             if self.oi.get_hatch_grabber():

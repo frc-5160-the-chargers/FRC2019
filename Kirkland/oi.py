@@ -21,7 +21,7 @@ class OI:
             "shift_drivetrain": wpilib.XboxController.Button.kBumperRight,
             "drive_mode_switch": wpilib.XboxController.Button.kX,
             "camera_switch": wpilib.XboxController.Button.kB,
-            "start_drive_straight": wpilib.XboxController.Button.kBumperLeft,
+            "drive_straight": wpilib.XboxController.Button.kBumperLeft,
 
             # sysop controls
             "hatch_grabber": wpilib.XboxController.Button.kB,
@@ -41,6 +41,9 @@ class OI:
     def get_button_config_pressed(self, controller : wpilib.XboxController, button_name):
         return self.get_button_pressed(controller, self.settings[button_name])
 
+    def get_button_config_held(self, controller: wpilib.XboxController, button_name):
+        return controller.getRawButton(self.settings[button_name])
+
     def process_deadzone(self, i, deadzone):
         if i < -deadzone or i > deadzone:
             return i
@@ -56,8 +59,8 @@ class OI:
     def get_drive_mode_switch(self):
         return self.get_button_config_pressed(self.driver, "drive_mode_switch")
 
-    def get_start_drive_straight(self):
-        return self.get_button_config_pressed(self.driver, "start_drive_straight")
+    def get_drive_straight(self):
+        return self.get_button_config_held(self.driver, "drive_straight")
 
     def get_camera_switch(self):
         return self.get_button_config_pressed(self.driver, "camera_switch")
