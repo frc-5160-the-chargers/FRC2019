@@ -30,7 +30,9 @@ class OI:
             "calibrate_pressure": wpilib.XboxController.Button.kStickLeft,
 
             # drive tuning
-            "driver_deadzone": 0.1
+            "driver_deadzone": 0.1,
+            "straight_angle": 30,
+            "straight_deadzone": 0.2
         }
 
         self.settings = default_settings
@@ -48,6 +50,13 @@ class OI:
         if i < -deadzone or i > deadzone:
             return i
         return 0
+
+    def check_drivetrain_straight(self, x, y):
+        '''check and see if the input falls within the range needed to make the robot drive in a straight line'''
+        # print(f"{x}, {y}")
+        # theta = math.degrees(math.atan2(-x, abs(y)))
+        # return abs(theta) < self.settings["straight_angle"]
+        return abs(x) < self.settings["straight_deadzone"]
 
     def drivetrain_curve(self, i):
         deadzoned = self.process_deadzone(i, self.settings["driver_deadzone"])
