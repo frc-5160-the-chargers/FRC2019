@@ -32,7 +32,8 @@ class OI:
             # drive tuning
             "driver_deadzone": 0.1,
             "straight_angle": 30,
-            "straight_deadzone": 0.2
+            "straight_deadzone_horizontal": 0.05,
+            "straight_deadzone_vertical": 0.1
         }
 
         self.settings = default_settings
@@ -56,7 +57,7 @@ class OI:
         # print(f"{x}, {y}")
         # theta = math.degrees(math.atan2(-x, abs(y)))
         # return abs(theta) < self.settings["straight_angle"]
-        return abs(x) < self.settings["straight_deadzone"]
+        return self.process_deadzone(abs(x), self.settings["straight_deadzone_horizontal"]) == 0 and self.process_deadzone(abs(y), self.settings["straight_deadzone_vertical"]) != 0
 
     def drivetrain_curve(self, i):
         deadzoned = self.process_deadzone(i, self.settings["driver_deadzone"])

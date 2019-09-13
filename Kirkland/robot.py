@@ -43,7 +43,8 @@ class MyRobot(magicbot.MagicRobot):
             robotmap.Ports.Cargo.locking_servo)
 
         utils.configure_motor(
-            self.cargo_mechanism_motor_rotator, ctre.NeutralMode.Brake)
+            self.cargo_mechanism_motor_rotator, ctre.NeutralMode.Brake, robotmap.MotorConfiguration.Cargo.peak_current, robotmap.MotorConfiguration.Cargo.peak_current_duration)
+        self.cargo_mechanism_motor_rotator.setInverted(robotmap.MotorConfiguration.Cargo.inverted)
 
         # HATCH MECHANISM
         self.hatch_grab_actuator = wpilib.DoubleSolenoid(
@@ -112,12 +113,12 @@ class MyRobot(magicbot.MagicRobot):
             # DRIVETRAIN
             if self.drivetrain.drive_mode == DriveModes.ARCADEDRIVE:
                 self.drivetrain.arcade_drive(self.oi.drivetrain_curve(self.oi.driver.getY(
-                    self.oi.driver.Hand.kLeft)), -self.oi.driver.getX(self.oi.driver.Hand.kRight)/1.5)
+                    self.oi.driver.Hand.kLeft)), -self.oi.driver.getX(self.oi.driver.Hand.kRight))
             elif self.drivetrain.drive_mode == DriveModes.TANKDRIVE:
                 self.drivetrain.tank_drive(self.oi.drivetrain_curve(self.oi.driver.getY(
                     self.oi.driver.Hand.kLeft)), self.oi.drivetrain_curve(self.oi.driver.getY(self.oi.driver.Hand.kRight)))
             
-            if self.oi.check_drivetrain_straight(self.oi.driver.getX(self.oi.driver.Hand.kRight), self.oi.driver.getY(self.oi.driver.Hand.kLeft)):
+            if self.navx.isConnected() and self.oi.check_drivetrain_straight(self.oi.driver.getX(self.oi.driver.Hand.kRight), self.oi.driver.getY(self.oi.driver.Hand.kLeft)):
                 self.drivetrain.drive_straight(self.oi.drivetrain_curve(self.oi.driver.getY(self.oi.driver.Hand.kLeft)))
             elif self.drivetrain.drive_mode == DriveModes.DRIVETOANGLE:
                 self.drivetrain.drive_mode = DriveModes.ARCADEDRIVE
@@ -125,8 +126,8 @@ class MyRobot(magicbot.MagicRobot):
             if self.oi.get_drivetrain_shift():
                 self.drivetrain_mechanism.toggle_shift()
 
-            if self.oi.get_drive_mode_switch():
-                self.drivetrain.toggle_mode()
+            # if self.oi.get_drive_mode_switch():
+            #     self.drivetrain.toggle_mode()
 
             # HATCHES
             if self.oi.get_hatch_grabber():
@@ -154,11 +155,9 @@ class MyRobot(magicbot.MagicRobot):
 
             # SMARTDASHBOARD
             dash.putNumber("Calibrated Pressure: ", self.pressure_sensor.get_pressure())
-            dash.putString("Grabber: ", "Grabbing" if self.hatch_grabber.state == HatchGrabberPositions.GRABBING else "Released")
-            dash.putString("Rack: ", "Extended" if self.hatch_rack.state == HatchRackPositions.EXTENDED else "Retracted")            
-            dash.putString("Drive Mode: ", "Arcade Drive" if self.drivetrain.drive_mode == DriveModes.ARCADEDRIVE else "Tank Drive")
-            dash.putString("Current Angle: ", self.navx.getAngle())
-            dash.putString("Current rotation: ", self.drivetrain.rotation)
+            dash.putString("Grabber: ", self.hatch_grabber.state)
+            dash.putString("Rack: ", self.hatch_rack.state)
+            dash.putString("Drive Mode: ", self.drivetrain.drive_mode)
             self.camera_table.putString("Selected Camera", f"{self.current_camera}")
         except:
             self.onException()

@@ -82,25 +82,32 @@ class Drivetrain:
 
         self.angle = 0
 
+        self.turning_modifier = 1
+
     def arcade_drive(self, power, rotation):
         self.drive_mode = DriveModes.ARCADEDRIVE
-        self.speed = utils.clamp(power, -robotmap.Tuning.Drivetrain.motor_power_percentage_limit,
-                                 robotmap.Tuning.Drivetrain.motor_power_percentage_limit)
+        self.speed = power
+        # self.speed = min(max(-0.5, power), 0.5)
+        # self.speed = utils.clamp(power, -robotmap.Tuning.Drivetrain.motor_power_percentage_limit,
+                                #  robotmap.Tuning.Drivetrain.motor_power_percentage_limit)
         self.rotation = rotation
 
     def tank_drive(self, left_power, right_power):
         self.drive_mode = DriveModes.TANKDRIVE
-        self.left_power = utils.clamp(left_power, -robotmap.Tuning.Drivetrain.motor_power_percentage_limit,
-                                      robotmap.Tuning.Drivetrain.motor_power_percentage_limit)
-        self.right_power = utils.clamp(right_power, -robotmap.Tuning.Drivetrain.motor_power_percentage_limit,
-                                       robotmap.Tuning.Drivetrain.motor_power_percentage_limit)
+        self.left_power = left_power
+        self.right_power = right_power
+        # self.left_power = utils.clamp(left_power, -robotmap.Tuning.Drivetrain.motor_power_percentage_limit,
+        #                               robotmap.Tuning.Drivetrain.motor_power_percentage_limit)
+        # self.right_power = utils.clamp(right_power, -robotmap.Tuning.Drivetrain.motor_power_percentage_limit,
+                                    #    robotmap.Tuning.Drivetrain.motor_power_percentage_limit)
 
     def drive_to_angle(self, power, angle=0):
         if self.drive_mode != DriveModes.DRIVETOANGLE:
             self.drive_mode = DriveModes.DRIVETOANGLE
             self.navx.reset()
-        self.speed = utils.clamp(power, -robotmap.Tuning.Drivetrain.motor_power_percentage_limit,
-                                 robotmap.Tuning.Drivetrain.motor_power_percentage_limit)
+        self.speed = power
+        # self.speed = utils.clamp(power, -robotmap.Tuning.Drivetrain.motor_power_percentage_limit,
+        #                          robotmap.Tuning.Drivetrain.motor_power_percentage_limit)
         rotation_error = self.navx.getAngle() - angle
         raw_rotation = rotation_error * robotmap.Tuning.Drivetrain.drive_straight_constant
         self.rotation = math.copysign(abs(raw_rotation)**.5, raw_rotation)
@@ -151,7 +158,7 @@ class Drivetrain:
             self.differential_drive.tankDrive(
                 self.left_power, self.right_power)
         if self.drive_mode == DriveModes.ARCADEDRIVE:
-            self.differential_drive.arcadeDrive(self.speed, self.rotation)
+            self.differential_drive.arcadeDrive(self.speed, self.rotation*self.turning_modifier)
         if self.drive_mode == DriveModes.DRIVETOANGLE:
             self.differential_drive.arcadeDrive(self.speed, self.rotation)
 
@@ -185,7 +192,10 @@ class DrivetrainMechanism:
             self.shift_up()
 
     def execute(self):
-        pass
+        self.drivetrain.differential_drive.setMaxOutput(
+            robotmap.Tuning.Drivetrain.low_gear_speed_limit if self.shifters.gear == ShifterGear.LOW_GEAR else robotmap.Tuning.Drivetrain.high_gear_speed_limit)
+
+        self.drivetrain.turning_modifier = robotmap.Tuning.Drivetrain.low_gear_turning_modifier if self.shifters.gear != ShifterGear.LOW_GEAR else robotmap.Tuning.Drivetrain.high_gear_turning_modifier
 
     def reset(self):
         self.drivetrain.drive_mode = DriveModes.ARCADEDRIVE

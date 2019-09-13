@@ -68,7 +68,11 @@ class Physics:
 
 class Tuning:
     class Drivetrain:
-        motor_power_percentage_limit = .5
+        high_gear_speed_limit = .4
+        low_gear_speed_limit = .6
+
+        low_gear_turning_modifier = .6
+        high_gear_turning_modifier = .9
 
         min_shifting_speed = 5
         shifting_speed_enabled = False
@@ -84,7 +88,7 @@ class Tuning:
 
         class Rotator:
             lifting_power_limit = .25
-            lowering_power_limit = .2
+            lowering_power_limit = .25
 
         class Servo:
             locked_position = 180
@@ -102,10 +106,13 @@ class Tuning:
 
 class MotorConfiguration:
     class Drivetrain:
-        peak_current = 30
-        peak_current_duration = 5
-        neutral_mode = NeutralMode.Coast
-        ramp_rate = 0.3
+        peak_current = 20
+        peak_current_duration = 1
+        neutral_mode = NeutralMode.Brake
+        ramp_rate = 0.2
 
     class Cargo:
-        pass
+        peak_current = 1
+        peak_current_duration = 1
+        
+        inverted = True
