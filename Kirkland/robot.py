@@ -99,7 +99,7 @@ class MyRobot(magicbot.MagicRobot):
            "/CameraPublisher")
 
         # this is important for this year...
-        self.use_teleop_in_autonomous = True
+        # self.use_teleop_in_autonomous = True
 
         self.navx = navx.AHRS.create_spi()
 

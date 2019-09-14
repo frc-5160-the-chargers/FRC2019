@@ -54,9 +54,6 @@ class OI:
 
     def check_drivetrain_straight(self, x, y):
         '''check and see if the input falls within the range needed to make the robot drive in a straight line'''
-        # print(f"{x}, {y}")
-        # theta = math.degrees(math.atan2(-x, abs(y)))
-        # return abs(theta) < self.settings["straight_angle"]
         return self.process_deadzone(abs(x), self.settings["straight_deadzone_horizontal"]) == 0 and self.process_deadzone(abs(y), self.settings["straight_deadzone_vertical"]) != 0
 
     def drivetrain_curve(self, i):

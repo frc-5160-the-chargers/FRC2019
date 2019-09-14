@@ -11,6 +11,7 @@ def clamp(i, minNum, maxNum):
 
 
 def configure_motor(motor: ctre.WPI_TalonSRX, neutral_mode: ctre.NeutralMode, peak_current=0, peak_current_duration=0, ramp_rate=0):
+    # motor.configFactoryDefault()
     motor.clearStickyFaults()
     motor.setNeutralMode(neutral_mode)
     if peak_current != 0:

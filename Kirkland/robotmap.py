@@ -69,7 +69,7 @@ class Physics:
 class Tuning:
     class Drivetrain:
         high_gear_speed_limit = .4
-        low_gear_speed_limit = .6
+        low_gear_speed_limit = .8
 
         low_gear_turning_modifier = .6
         high_gear_turning_modifier = .9
